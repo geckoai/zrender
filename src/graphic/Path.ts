@@ -203,8 +203,13 @@ class Path<Props extends PathProps = PathProps> extends Displayable<Props> {
     getAbsoluteBoundingRect(): BoundingRect {
         const boundingRect =  this.getBoundingRect().plain();
         const parents = this.getParents();
-        boundingRect.x = this.shape.x;
-        boundingRect.y = this.shape.y;
+        if (parents.length) {
+            boundingRect.x = this.x;
+            boundingRect.y = this.y;
+        } else {
+            boundingRect.x = this.shape.x;
+            boundingRect.y = this.shape.y;
+        }
         parents.forEach((e) => {
             boundingRect.x += e.x;
             boundingRect.y += e.y;

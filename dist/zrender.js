@@ -7380,7 +7380,7 @@
     function registerSSRDataGetter(getter) {
         ssrDataGetter = getter;
     }
-    var version = '5.5.1';
+    var version = '5.5.0';
 
     var STYLE_MAGIC_KEY = '__zr_style_' + Math.round((Math.random() * 10));
     var DEFAULT_COMMON_STYLE = {
@@ -9010,8 +9010,14 @@
         Path.prototype.getAbsoluteBoundingRect = function () {
             var boundingRect = this.getBoundingRect().plain();
             var parents = this.getParents();
-            boundingRect.x = this.shape.x;
-            boundingRect.y = this.shape.y;
+            if (parents.length) {
+                boundingRect.x = this.x;
+                boundingRect.y = this.y;
+            }
+            else {
+                boundingRect.x = this.shape.x;
+                boundingRect.y = this.shape.y;
+            }
             parents.forEach(function (e) {
                 boundingRect.x += e.x;
                 boundingRect.y += e.y;
