@@ -1,6 +1,8 @@
 /doc
 /test
 /benchmark
+/.idea
+/dist
 .github
 .vscode
 
@@ -8,3 +10,4 @@ npm-debug.log
 .DS_Store
 Thumbs.db
 Desktop.ini
+yarn.lock

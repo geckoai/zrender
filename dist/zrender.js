@@ -84,9 +84,50 @@
             || (browser.ie && +browser.version >= 9);
     }
 
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    function __spreadArray(to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || from);
+    }
+
     var DEFAULT_FONT_SIZE = 12;
     var DEFAULT_FONT_FAMILY = 'sans-serif';
-    var DEFAULT_FONT = DEFAULT_FONT_SIZE + "px " + DEFAULT_FONT_FAMILY;
+    var DEFAULT_FONT = "".concat(DEFAULT_FONT_SIZE, "px ").concat(DEFAULT_FONT_FAMILY);
     var OFFSET = 20;
     var SCALE = 100;
     var defaultWidthMapStr = "007LLmW'55;N0500LLLLLLLLLL00NNNLzWW\\\\WQb\\0FWLg\\bWb\\WQ\\WrWWQ000CL5LLFLL0LL**F*gLLLL5F0LF\\FFF5.5N";
@@ -157,6 +198,4468 @@
         }
     }
 
+    function create() {
+        return [1, 0, 0, 1, 0, 0];
+    }
+    function identity(out) {
+        out[0] = 1;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 1;
+        out[4] = 0;
+        out[5] = 0;
+        return out;
+    }
+    function copy(out, m) {
+        out[0] = m[0];
+        out[1] = m[1];
+        out[2] = m[2];
+        out[3] = m[3];
+        out[4] = m[4];
+        out[5] = m[5];
+        return out;
+    }
+    function mul(out, m1, m2) {
+        var out0 = m1[0] * m2[0] + m1[2] * m2[1];
+        var out1 = m1[1] * m2[0] + m1[3] * m2[1];
+        var out2 = m1[0] * m2[2] + m1[2] * m2[3];
+        var out3 = m1[1] * m2[2] + m1[3] * m2[3];
+        var out4 = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
+        var out5 = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
+        out[0] = out0;
+        out[1] = out1;
+        out[2] = out2;
+        out[3] = out3;
+        out[4] = out4;
+        out[5] = out5;
+        return out;
+    }
+    function translate(out, a, v) {
+        out[0] = a[0];
+        out[1] = a[1];
+        out[2] = a[2];
+        out[3] = a[3];
+        out[4] = a[4] + v[0];
+        out[5] = a[5] + v[1];
+        return out;
+    }
+    function rotate(out, a, rad, pivot) {
+        if (pivot === void 0) { pivot = [0, 0]; }
+        var aa = a[0];
+        var ac = a[2];
+        var atx = a[4];
+        var ab = a[1];
+        var ad = a[3];
+        var aty = a[5];
+        var st = Math.sin(rad);
+        var ct = Math.cos(rad);
+        out[0] = aa * ct + ab * st;
+        out[1] = -aa * st + ab * ct;
+        out[2] = ac * ct + ad * st;
+        out[3] = -ac * st + ct * ad;
+        out[4] = ct * (atx - pivot[0]) + st * (aty - pivot[1]) + pivot[0];
+        out[5] = ct * (aty - pivot[1]) - st * (atx - pivot[0]) + pivot[1];
+        return out;
+    }
+    function scale(out, a, v) {
+        var vx = v[0];
+        var vy = v[1];
+        out[0] = a[0] * vx;
+        out[1] = a[1] * vy;
+        out[2] = a[2] * vx;
+        out[3] = a[3] * vy;
+        out[4] = a[4] * vx;
+        out[5] = a[5] * vy;
+        return out;
+    }
+    function invert(out, a) {
+        var aa = a[0];
+        var ac = a[2];
+        var atx = a[4];
+        var ab = a[1];
+        var ad = a[3];
+        var aty = a[5];
+        var det = aa * ad - ab * ac;
+        if (!det) {
+            return null;
+        }
+        det = 1.0 / det;
+        out[0] = ad * det;
+        out[1] = -ab * det;
+        out[2] = -ac * det;
+        out[3] = aa * det;
+        out[4] = (ac * aty - ad * atx) * det;
+        out[5] = (ab * atx - aa * aty) * det;
+        return out;
+    }
+    function clone(a) {
+        var b = create();
+        copy(b, a);
+        return b;
+    }
+
+    var matrix = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        create: create,
+        identity: identity,
+        copy: copy,
+        mul: mul,
+        translate: translate,
+        rotate: rotate,
+        scale: scale,
+        invert: invert,
+        clone: clone
+    });
+
+    function create$1(x, y) {
+        if (x == null) {
+            x = 0;
+        }
+        if (y == null) {
+            y = 0;
+        }
+        return [x, y];
+    }
+    function copy$1(out, v) {
+        out[0] = v[0];
+        out[1] = v[1];
+        return out;
+    }
+    function clone$1(v) {
+        return [v[0], v[1]];
+    }
+    function set(out, a, b) {
+        out[0] = a;
+        out[1] = b;
+        return out;
+    }
+    function add(out, v1, v2) {
+        out[0] = v1[0] + v2[0];
+        out[1] = v1[1] + v2[1];
+        return out;
+    }
+    function scaleAndAdd(out, v1, v2, a) {
+        out[0] = v1[0] + v2[0] * a;
+        out[1] = v1[1] + v2[1] * a;
+        return out;
+    }
+    function sub(out, v1, v2) {
+        out[0] = v1[0] - v2[0];
+        out[1] = v1[1] - v2[1];
+        return out;
+    }
+    function len(v) {
+        return Math.sqrt(lenSquare(v));
+    }
+    var length = len;
+    function lenSquare(v) {
+        return v[0] * v[0] + v[1] * v[1];
+    }
+    var lengthSquare = lenSquare;
+    function mul$1(out, v1, v2) {
+        out[0] = v1[0] * v2[0];
+        out[1] = v1[1] * v2[1];
+        return out;
+    }
+    function div(out, v1, v2) {
+        out[0] = v1[0] / v2[0];
+        out[1] = v1[1] / v2[1];
+        return out;
+    }
+    function dot(v1, v2) {
+        return v1[0] * v2[0] + v1[1] * v2[1];
+    }
+    function scale$1(out, v, s) {
+        out[0] = v[0] * s;
+        out[1] = v[1] * s;
+        return out;
+    }
+    function normalize(out, v) {
+        var d = len(v);
+        if (d === 0) {
+            out[0] = 0;
+            out[1] = 0;
+        }
+        else {
+            out[0] = v[0] / d;
+            out[1] = v[1] / d;
+        }
+        return out;
+    }
+    function distance(v1, v2) {
+        return Math.sqrt((v1[0] - v2[0]) * (v1[0] - v2[0])
+            + (v1[1] - v2[1]) * (v1[1] - v2[1]));
+    }
+    var dist = distance;
+    function distanceSquare(v1, v2) {
+        return (v1[0] - v2[0]) * (v1[0] - v2[0])
+            + (v1[1] - v2[1]) * (v1[1] - v2[1]);
+    }
+    var distSquare = distanceSquare;
+    function negate(out, v) {
+        out[0] = -v[0];
+        out[1] = -v[1];
+        return out;
+    }
+    function lerp(out, v1, v2, t) {
+        out[0] = v1[0] + t * (v2[0] - v1[0]);
+        out[1] = v1[1] + t * (v2[1] - v1[1]);
+        return out;
+    }
+    function applyTransform(out, v, m) {
+        var x = v[0];
+        var y = v[1];
+        out[0] = m[0] * x + m[2] * y + m[4];
+        out[1] = m[1] * x + m[3] * y + m[5];
+        return out;
+    }
+    function min(out, v1, v2) {
+        out[0] = Math.min(v1[0], v2[0]);
+        out[1] = Math.min(v1[1], v2[1]);
+        return out;
+    }
+    function max(out, v1, v2) {
+        out[0] = Math.max(v1[0], v2[0]);
+        out[1] = Math.max(v1[1], v2[1]);
+        return out;
+    }
+
+    var vector = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        create: create$1,
+        copy: copy$1,
+        clone: clone$1,
+        set: set,
+        add: add,
+        scaleAndAdd: scaleAndAdd,
+        sub: sub,
+        len: len,
+        length: length,
+        lenSquare: lenSquare,
+        lengthSquare: lengthSquare,
+        mul: mul$1,
+        div: div,
+        dot: dot,
+        scale: scale$1,
+        normalize: normalize,
+        distance: distance,
+        dist: dist,
+        distanceSquare: distanceSquare,
+        distSquare: distSquare,
+        negate: negate,
+        lerp: lerp,
+        applyTransform: applyTransform,
+        min: min,
+        max: max
+    });
+
+    var mIdentity = identity;
+    var EPSILON = 5e-5;
+    function isNotAroundZero(val) {
+        return val > EPSILON || val < -EPSILON;
+    }
+    var scaleTmp = [];
+    var tmpTransform = [];
+    var originTransform = create();
+    var abs = Math.abs;
+    var Transformable = (function () {
+        function Transformable() {
+        }
+        Transformable.prototype.getLocalTransform = function (m) {
+            return Transformable.getLocalTransform(this, m);
+        };
+        Transformable.prototype.setPosition = function (arr) {
+            this.x = arr[0];
+            this.y = arr[1];
+        };
+        Transformable.prototype.setScale = function (arr) {
+            this.scaleX = arr[0];
+            this.scaleY = arr[1];
+        };
+        Transformable.prototype.setSkew = function (arr) {
+            this.skewX = arr[0];
+            this.skewY = arr[1];
+        };
+        Transformable.prototype.setOrigin = function (arr) {
+            this.originX = arr[0];
+            this.originY = arr[1];
+        };
+        Transformable.prototype.needLocalTransform = function () {
+            return isNotAroundZero(this.rotation)
+                || isNotAroundZero(this.x)
+                || isNotAroundZero(this.y)
+                || isNotAroundZero(this.scaleX - 1)
+                || isNotAroundZero(this.scaleY - 1)
+                || isNotAroundZero(this.skewX)
+                || isNotAroundZero(this.skewY);
+        };
+        Transformable.prototype.updateTransform = function () {
+            var parentTransform = this.parent && this.parent.transform;
+            var needLocalTransform = this.needLocalTransform();
+            var m = this.transform;
+            if (!(needLocalTransform || parentTransform)) {
+                if (m) {
+                    mIdentity(m);
+                    this.invTransform = null;
+                }
+                return;
+            }
+            m = m || create();
+            if (needLocalTransform) {
+                this.getLocalTransform(m);
+            }
+            else {
+                mIdentity(m);
+            }
+            if (parentTransform) {
+                if (needLocalTransform) {
+                    mul(m, parentTransform, m);
+                }
+                else {
+                    copy(m, parentTransform);
+                }
+            }
+            this.transform = m;
+            this._resolveGlobalScaleRatio(m);
+        };
+        Transformable.prototype._resolveGlobalScaleRatio = function (m) {
+            var globalScaleRatio = this.globalScaleRatio;
+            if (globalScaleRatio != null && globalScaleRatio !== 1) {
+                this.getGlobalScale(scaleTmp);
+                var relX = scaleTmp[0] < 0 ? -1 : 1;
+                var relY = scaleTmp[1] < 0 ? -1 : 1;
+                var sx = ((scaleTmp[0] - relX) * globalScaleRatio + relX) / scaleTmp[0] || 0;
+                var sy = ((scaleTmp[1] - relY) * globalScaleRatio + relY) / scaleTmp[1] || 0;
+                m[0] *= sx;
+                m[1] *= sx;
+                m[2] *= sy;
+                m[3] *= sy;
+            }
+            this.invTransform = this.invTransform || create();
+            invert(this.invTransform, m);
+        };
+        Transformable.prototype.getComputedTransform = function () {
+            var transformNode = this;
+            var ancestors = [];
+            while (transformNode) {
+                ancestors.push(transformNode);
+                transformNode = transformNode.parent;
+            }
+            while (transformNode = ancestors.pop()) {
+                transformNode.updateTransform();
+            }
+            return this.transform;
+        };
+        Transformable.prototype.setLocalTransform = function (m) {
+            if (!m) {
+                return;
+            }
+            var sx = m[0] * m[0] + m[1] * m[1];
+            var sy = m[2] * m[2] + m[3] * m[3];
+            var rotation = Math.atan2(m[1], m[0]);
+            var shearX = Math.PI / 2 + rotation - Math.atan2(m[3], m[2]);
+            sy = Math.sqrt(sy) * Math.cos(shearX);
+            sx = Math.sqrt(sx);
+            this.skewX = shearX;
+            this.skewY = 0;
+            this.rotation = -rotation;
+            this.x = +m[4];
+            this.y = +m[5];
+            this.scaleX = sx;
+            this.scaleY = sy;
+            this.originX = 0;
+            this.originY = 0;
+        };
+        Transformable.prototype.decomposeTransform = function () {
+            if (!this.transform) {
+                return;
+            }
+            var parent = this.parent;
+            var m = this.transform;
+            if (parent && parent.transform) {
+                parent.invTransform = parent.invTransform || create();
+                mul(tmpTransform, parent.invTransform, m);
+                m = tmpTransform;
+            }
+            var ox = this.originX;
+            var oy = this.originY;
+            if (ox || oy) {
+                originTransform[4] = ox;
+                originTransform[5] = oy;
+                mul(tmpTransform, m, originTransform);
+                tmpTransform[4] -= ox;
+                tmpTransform[5] -= oy;
+                m = tmpTransform;
+            }
+            this.setLocalTransform(m);
+        };
+        Transformable.prototype.getGlobalScale = function (out) {
+            var m = this.transform;
+            out = out || [];
+            if (!m) {
+                out[0] = 1;
+                out[1] = 1;
+                return out;
+            }
+            out[0] = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
+            out[1] = Math.sqrt(m[2] * m[2] + m[3] * m[3]);
+            if (m[0] < 0) {
+                out[0] = -out[0];
+            }
+            if (m[3] < 0) {
+                out[1] = -out[1];
+            }
+            return out;
+        };
+        Transformable.prototype.transformCoordToLocal = function (x, y) {
+            var v2 = [x, y];
+            var invTransform = this.invTransform;
+            if (invTransform) {
+                applyTransform(v2, v2, invTransform);
+            }
+            return v2;
+        };
+        Transformable.prototype.transformCoordToGlobal = function (x, y) {
+            var v2 = [x, y];
+            var transform = this.transform;
+            if (transform) {
+                applyTransform(v2, v2, transform);
+            }
+            return v2;
+        };
+        Transformable.prototype.getLineScale = function () {
+            var m = this.transform;
+            return m && abs(m[0] - 1) > 1e-10 && abs(m[3] - 1) > 1e-10
+                ? Math.sqrt(abs(m[0] * m[3] - m[2] * m[1]))
+                : 1;
+        };
+        Transformable.prototype.copyTransform = function (source) {
+            copyTransform(this, source);
+        };
+        Transformable.getLocalTransform = function (target, m) {
+            m = m || [];
+            var ox = target.originX || 0;
+            var oy = target.originY || 0;
+            var sx = target.scaleX;
+            var sy = target.scaleY;
+            var ax = target.anchorX;
+            var ay = target.anchorY;
+            var rotation = target.rotation || 0;
+            var x = target.x;
+            var y = target.y;
+            var skewX = target.skewX ? Math.tan(target.skewX) : 0;
+            var skewY = target.skewY ? Math.tan(-target.skewY) : 0;
+            if (ox || oy || ax || ay) {
+                var dx = ox + ax;
+                var dy = oy + ay;
+                m[4] = -dx * sx - skewX * dy * sy;
+                m[5] = -dy * sy - skewY * dx * sx;
+            }
+            else {
+                m[4] = m[5] = 0;
+            }
+            m[0] = sx;
+            m[3] = sy;
+            m[1] = skewY * sx;
+            m[2] = skewX * sy;
+            rotation && rotate(m, m, rotation);
+            m[4] += ox + x;
+            m[5] += oy + y;
+            return m;
+        };
+        Transformable.initDefaultProps = (function () {
+            var proto = Transformable.prototype;
+            proto.scaleX =
+                proto.scaleY =
+                    proto.globalScaleRatio = 1;
+            proto.x =
+                proto.y =
+                    proto.originX =
+                        proto.originY =
+                            proto.skewX =
+                                proto.skewY =
+                                    proto.rotation =
+                                        proto.anchorX =
+                                            proto.anchorY = 0;
+        })();
+        return Transformable;
+    }());
+    var TRANSFORMABLE_PROPS = [
+        'x', 'y', 'originX', 'originY', 'anchorX', 'anchorY', 'rotation', 'scaleX', 'scaleY', 'skewX', 'skewY'
+    ];
+    function copyTransform(target, source) {
+        for (var i = 0; i < TRANSFORMABLE_PROPS.length; i++) {
+            var propName = TRANSFORMABLE_PROPS[i];
+            target[propName] = source[propName];
+        }
+    }
+
+    var easingFuncs = {
+        linear: function (k) {
+            return k;
+        },
+        quadraticIn: function (k) {
+            return k * k;
+        },
+        quadraticOut: function (k) {
+            return k * (2 - k);
+        },
+        quadraticInOut: function (k) {
+            if ((k *= 2) < 1) {
+                return 0.5 * k * k;
+            }
+            return -0.5 * (--k * (k - 2) - 1);
+        },
+        cubicIn: function (k) {
+            return k * k * k;
+        },
+        cubicOut: function (k) {
+            return --k * k * k + 1;
+        },
+        cubicInOut: function (k) {
+            if ((k *= 2) < 1) {
+                return 0.5 * k * k * k;
+            }
+            return 0.5 * ((k -= 2) * k * k + 2);
+        },
+        quarticIn: function (k) {
+            return k * k * k * k;
+        },
+        quarticOut: function (k) {
+            return 1 - (--k * k * k * k);
+        },
+        quarticInOut: function (k) {
+            if ((k *= 2) < 1) {
+                return 0.5 * k * k * k * k;
+            }
+            return -0.5 * ((k -= 2) * k * k * k - 2);
+        },
+        quinticIn: function (k) {
+            return k * k * k * k * k;
+        },
+        quinticOut: function (k) {
+            return --k * k * k * k * k + 1;
+        },
+        quinticInOut: function (k) {
+            if ((k *= 2) < 1) {
+                return 0.5 * k * k * k * k * k;
+            }
+            return 0.5 * ((k -= 2) * k * k * k * k + 2);
+        },
+        sinusoidalIn: function (k) {
+            return 1 - Math.cos(k * Math.PI / 2);
+        },
+        sinusoidalOut: function (k) {
+            return Math.sin(k * Math.PI / 2);
+        },
+        sinusoidalInOut: function (k) {
+            return 0.5 * (1 - Math.cos(Math.PI * k));
+        },
+        exponentialIn: function (k) {
+            return k === 0 ? 0 : Math.pow(1024, k - 1);
+        },
+        exponentialOut: function (k) {
+            return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+        },
+        exponentialInOut: function (k) {
+            if (k === 0) {
+                return 0;
+            }
+            if (k === 1) {
+                return 1;
+            }
+            if ((k *= 2) < 1) {
+                return 0.5 * Math.pow(1024, k - 1);
+            }
+            return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+        },
+        circularIn: function (k) {
+            return 1 - Math.sqrt(1 - k * k);
+        },
+        circularOut: function (k) {
+            return Math.sqrt(1 - (--k * k));
+        },
+        circularInOut: function (k) {
+            if ((k *= 2) < 1) {
+                return -0.5 * (Math.sqrt(1 - k * k) - 1);
+            }
+            return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+        },
+        elasticIn: function (k) {
+            var s;
+            var a = 0.1;
+            var p = 0.4;
+            if (k === 0) {
+                return 0;
+            }
+            if (k === 1) {
+                return 1;
+            }
+            if (!a || a < 1) {
+                a = 1;
+                s = p / 4;
+            }
+            else {
+                s = p * Math.asin(1 / a) / (2 * Math.PI);
+            }
+            return -(a * Math.pow(2, 10 * (k -= 1))
+                * Math.sin((k - s) * (2 * Math.PI) / p));
+        },
+        elasticOut: function (k) {
+            var s;
+            var a = 0.1;
+            var p = 0.4;
+            if (k === 0) {
+                return 0;
+            }
+            if (k === 1) {
+                return 1;
+            }
+            if (!a || a < 1) {
+                a = 1;
+                s = p / 4;
+            }
+            else {
+                s = p * Math.asin(1 / a) / (2 * Math.PI);
+            }
+            return (a * Math.pow(2, -10 * k)
+                * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
+        },
+        elasticInOut: function (k) {
+            var s;
+            var a = 0.1;
+            var p = 0.4;
+            if (k === 0) {
+                return 0;
+            }
+            if (k === 1) {
+                return 1;
+            }
+            if (!a || a < 1) {
+                a = 1;
+                s = p / 4;
+            }
+            else {
+                s = p * Math.asin(1 / a) / (2 * Math.PI);
+            }
+            if ((k *= 2) < 1) {
+                return -0.5 * (a * Math.pow(2, 10 * (k -= 1))
+                    * Math.sin((k - s) * (2 * Math.PI) / p));
+            }
+            return a * Math.pow(2, -10 * (k -= 1))
+                * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
+        },
+        backIn: function (k) {
+            var s = 1.70158;
+            return k * k * ((s + 1) * k - s);
+        },
+        backOut: function (k) {
+            var s = 1.70158;
+            return --k * k * ((s + 1) * k + s) + 1;
+        },
+        backInOut: function (k) {
+            var s = 1.70158 * 1.525;
+            if ((k *= 2) < 1) {
+                return 0.5 * (k * k * ((s + 1) * k - s));
+            }
+            return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+        },
+        bounceIn: function (k) {
+            return 1 - easingFuncs.bounceOut(1 - k);
+        },
+        bounceOut: function (k) {
+            if (k < (1 / 2.75)) {
+                return 7.5625 * k * k;
+            }
+            else if (k < (2 / 2.75)) {
+                return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+            }
+            else if (k < (2.5 / 2.75)) {
+                return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+            }
+            else {
+                return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+            }
+        },
+        bounceInOut: function (k) {
+            if (k < 0.5) {
+                return easingFuncs.bounceIn(k * 2) * 0.5;
+            }
+            return easingFuncs.bounceOut(k * 2 - 1) * 0.5 + 0.5;
+        }
+    };
+
+    var mathPow = Math.pow;
+    var mathSqrt = Math.sqrt;
+    var EPSILON$1 = 1e-8;
+    var EPSILON_NUMERIC = 1e-4;
+    var THREE_SQRT = mathSqrt(3);
+    var ONE_THIRD = 1 / 3;
+    var _v0 = create$1();
+    var _v1 = create$1();
+    var _v2 = create$1();
+    function isAroundZero(val) {
+        return val > -EPSILON$1 && val < EPSILON$1;
+    }
+    function isNotAroundZero$1(val) {
+        return val > EPSILON$1 || val < -EPSILON$1;
+    }
+    function cubicAt(p0, p1, p2, p3, t) {
+        var onet = 1 - t;
+        return onet * onet * (onet * p0 + 3 * t * p1)
+            + t * t * (t * p3 + 3 * onet * p2);
+    }
+    function cubicDerivativeAt(p0, p1, p2, p3, t) {
+        var onet = 1 - t;
+        return 3 * (((p1 - p0) * onet + 2 * (p2 - p1) * t) * onet
+            + (p3 - p2) * t * t);
+    }
+    function cubicRootAt(p0, p1, p2, p3, val, roots) {
+        var a = p3 + 3 * (p1 - p2) - p0;
+        var b = 3 * (p2 - p1 * 2 + p0);
+        var c = 3 * (p1 - p0);
+        var d = p0 - val;
+        var A = b * b - 3 * a * c;
+        var B = b * c - 9 * a * d;
+        var C = c * c - 3 * b * d;
+        var n = 0;
+        if (isAroundZero(A) && isAroundZero(B)) {
+            if (isAroundZero(b)) {
+                roots[0] = 0;
+            }
+            else {
+                var t1 = -c / b;
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+            }
+        }
+        else {
+            var disc = B * B - 4 * A * C;
+            if (isAroundZero(disc)) {
+                var K = B / A;
+                var t1 = -b / a + K;
+                var t2 = -K / 2;
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+                if (t2 >= 0 && t2 <= 1) {
+                    roots[n++] = t2;
+                }
+            }
+            else if (disc > 0) {
+                var discSqrt = mathSqrt(disc);
+                var Y1 = A * b + 1.5 * a * (-B + discSqrt);
+                var Y2 = A * b + 1.5 * a * (-B - discSqrt);
+                if (Y1 < 0) {
+                    Y1 = -mathPow(-Y1, ONE_THIRD);
+                }
+                else {
+                    Y1 = mathPow(Y1, ONE_THIRD);
+                }
+                if (Y2 < 0) {
+                    Y2 = -mathPow(-Y2, ONE_THIRD);
+                }
+                else {
+                    Y2 = mathPow(Y2, ONE_THIRD);
+                }
+                var t1 = (-b - (Y1 + Y2)) / (3 * a);
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+            }
+            else {
+                var T = (2 * A * b - 3 * a * B) / (2 * mathSqrt(A * A * A));
+                var theta = Math.acos(T) / 3;
+                var ASqrt = mathSqrt(A);
+                var tmp = Math.cos(theta);
+                var t1 = (-b - 2 * ASqrt * tmp) / (3 * a);
+                var t2 = (-b + ASqrt * (tmp + THREE_SQRT * Math.sin(theta))) / (3 * a);
+                var t3 = (-b + ASqrt * (tmp - THREE_SQRT * Math.sin(theta))) / (3 * a);
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+                if (t2 >= 0 && t2 <= 1) {
+                    roots[n++] = t2;
+                }
+                if (t3 >= 0 && t3 <= 1) {
+                    roots[n++] = t3;
+                }
+            }
+        }
+        return n;
+    }
+    function cubicExtrema(p0, p1, p2, p3, extrema) {
+        var b = 6 * p2 - 12 * p1 + 6 * p0;
+        var a = 9 * p1 + 3 * p3 - 3 * p0 - 9 * p2;
+        var c = 3 * p1 - 3 * p0;
+        var n = 0;
+        if (isAroundZero(a)) {
+            if (isNotAroundZero$1(b)) {
+                var t1 = -c / b;
+                if (t1 >= 0 && t1 <= 1) {
+                    extrema[n++] = t1;
+                }
+            }
+        }
+        else {
+            var disc = b * b - 4 * a * c;
+            if (isAroundZero(disc)) {
+                extrema[0] = -b / (2 * a);
+            }
+            else if (disc > 0) {
+                var discSqrt = mathSqrt(disc);
+                var t1 = (-b + discSqrt) / (2 * a);
+                var t2 = (-b - discSqrt) / (2 * a);
+                if (t1 >= 0 && t1 <= 1) {
+                    extrema[n++] = t1;
+                }
+                if (t2 >= 0 && t2 <= 1) {
+                    extrema[n++] = t2;
+                }
+            }
+        }
+        return n;
+    }
+    function cubicSubdivide(p0, p1, p2, p3, t, out) {
+        var p01 = (p1 - p0) * t + p0;
+        var p12 = (p2 - p1) * t + p1;
+        var p23 = (p3 - p2) * t + p2;
+        var p012 = (p12 - p01) * t + p01;
+        var p123 = (p23 - p12) * t + p12;
+        var p0123 = (p123 - p012) * t + p012;
+        out[0] = p0;
+        out[1] = p01;
+        out[2] = p012;
+        out[3] = p0123;
+        out[4] = p0123;
+        out[5] = p123;
+        out[6] = p23;
+        out[7] = p3;
+    }
+    function cubicProjectPoint(x0, y0, x1, y1, x2, y2, x3, y3, x, y, out) {
+        var t;
+        var interval = 0.005;
+        var d = Infinity;
+        var prev;
+        var next;
+        var d1;
+        var d2;
+        _v0[0] = x;
+        _v0[1] = y;
+        for (var _t = 0; _t < 1; _t += 0.05) {
+            _v1[0] = cubicAt(x0, x1, x2, x3, _t);
+            _v1[1] = cubicAt(y0, y1, y2, y3, _t);
+            d1 = distSquare(_v0, _v1);
+            if (d1 < d) {
+                t = _t;
+                d = d1;
+            }
+        }
+        d = Infinity;
+        for (var i = 0; i < 32; i++) {
+            if (interval < EPSILON_NUMERIC) {
+                break;
+            }
+            prev = t - interval;
+            next = t + interval;
+            _v1[0] = cubicAt(x0, x1, x2, x3, prev);
+            _v1[1] = cubicAt(y0, y1, y2, y3, prev);
+            d1 = distSquare(_v1, _v0);
+            if (prev >= 0 && d1 < d) {
+                t = prev;
+                d = d1;
+            }
+            else {
+                _v2[0] = cubicAt(x0, x1, x2, x3, next);
+                _v2[1] = cubicAt(y0, y1, y2, y3, next);
+                d2 = distSquare(_v2, _v0);
+                if (next <= 1 && d2 < d) {
+                    t = next;
+                    d = d2;
+                }
+                else {
+                    interval *= 0.5;
+                }
+            }
+        }
+        if (out) {
+            out[0] = cubicAt(x0, x1, x2, x3, t);
+            out[1] = cubicAt(y0, y1, y2, y3, t);
+        }
+        return mathSqrt(d);
+    }
+    function cubicLength(x0, y0, x1, y1, x2, y2, x3, y3, iteration) {
+        var px = x0;
+        var py = y0;
+        var d = 0;
+        var step = 1 / iteration;
+        for (var i = 1; i <= iteration; i++) {
+            var t = i * step;
+            var x = cubicAt(x0, x1, x2, x3, t);
+            var y = cubicAt(y0, y1, y2, y3, t);
+            var dx = x - px;
+            var dy = y - py;
+            d += Math.sqrt(dx * dx + dy * dy);
+            px = x;
+            py = y;
+        }
+        return d;
+    }
+    function quadraticAt(p0, p1, p2, t) {
+        var onet = 1 - t;
+        return onet * (onet * p0 + 2 * t * p1) + t * t * p2;
+    }
+    function quadraticDerivativeAt(p0, p1, p2, t) {
+        return 2 * ((1 - t) * (p1 - p0) + t * (p2 - p1));
+    }
+    function quadraticRootAt(p0, p1, p2, val, roots) {
+        var a = p0 - 2 * p1 + p2;
+        var b = 2 * (p1 - p0);
+        var c = p0 - val;
+        var n = 0;
+        if (isAroundZero(a)) {
+            if (isNotAroundZero$1(b)) {
+                var t1 = -c / b;
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+            }
+        }
+        else {
+            var disc = b * b - 4 * a * c;
+            if (isAroundZero(disc)) {
+                var t1 = -b / (2 * a);
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+            }
+            else if (disc > 0) {
+                var discSqrt = mathSqrt(disc);
+                var t1 = (-b + discSqrt) / (2 * a);
+                var t2 = (-b - discSqrt) / (2 * a);
+                if (t1 >= 0 && t1 <= 1) {
+                    roots[n++] = t1;
+                }
+                if (t2 >= 0 && t2 <= 1) {
+                    roots[n++] = t2;
+                }
+            }
+        }
+        return n;
+    }
+    function quadraticExtremum(p0, p1, p2) {
+        var divider = p0 + p2 - 2 * p1;
+        if (divider === 0) {
+            return 0.5;
+        }
+        else {
+            return (p0 - p1) / divider;
+        }
+    }
+    function quadraticSubdivide(p0, p1, p2, t, out) {
+        var p01 = (p1 - p0) * t + p0;
+        var p12 = (p2 - p1) * t + p1;
+        var p012 = (p12 - p01) * t + p01;
+        out[0] = p0;
+        out[1] = p01;
+        out[2] = p012;
+        out[3] = p012;
+        out[4] = p12;
+        out[5] = p2;
+    }
+    function quadraticProjectPoint(x0, y0, x1, y1, x2, y2, x, y, out) {
+        var t;
+        var interval = 0.005;
+        var d = Infinity;
+        _v0[0] = x;
+        _v0[1] = y;
+        for (var _t = 0; _t < 1; _t += 0.05) {
+            _v1[0] = quadraticAt(x0, x1, x2, _t);
+            _v1[1] = quadraticAt(y0, y1, y2, _t);
+            var d1 = distSquare(_v0, _v1);
+            if (d1 < d) {
+                t = _t;
+                d = d1;
+            }
+        }
+        d = Infinity;
+        for (var i = 0; i < 32; i++) {
+            if (interval < EPSILON_NUMERIC) {
+                break;
+            }
+            var prev = t - interval;
+            var next = t + interval;
+            _v1[0] = quadraticAt(x0, x1, x2, prev);
+            _v1[1] = quadraticAt(y0, y1, y2, prev);
+            var d1 = distSquare(_v1, _v0);
+            if (prev >= 0 && d1 < d) {
+                t = prev;
+                d = d1;
+            }
+            else {
+                _v2[0] = quadraticAt(x0, x1, x2, next);
+                _v2[1] = quadraticAt(y0, y1, y2, next);
+                var d2 = distSquare(_v2, _v0);
+                if (next <= 1 && d2 < d) {
+                    t = next;
+                    d = d2;
+                }
+                else {
+                    interval *= 0.5;
+                }
+            }
+        }
+        if (out) {
+            out[0] = quadraticAt(x0, x1, x2, t);
+            out[1] = quadraticAt(y0, y1, y2, t);
+        }
+        return mathSqrt(d);
+    }
+    function quadraticLength(x0, y0, x1, y1, x2, y2, iteration) {
+        var px = x0;
+        var py = y0;
+        var d = 0;
+        var step = 1 / iteration;
+        for (var i = 1; i <= iteration; i++) {
+            var t = i * step;
+            var x = quadraticAt(x0, x1, x2, t);
+            var y = quadraticAt(y0, y1, y2, t);
+            var dx = x - px;
+            var dy = y - py;
+            d += Math.sqrt(dx * dx + dy * dy);
+            px = x;
+            py = y;
+        }
+        return d;
+    }
+
+    var regexp = /cubic-bezier\(([0-9,\.e ]+)\)/;
+    function createCubicEasingFunc(cubicEasingStr) {
+        var cubic = cubicEasingStr && regexp.exec(cubicEasingStr);
+        if (cubic) {
+            var points = cubic[1].split(',');
+            var a_1 = +trim(points[0]);
+            var b_1 = +trim(points[1]);
+            var c_1 = +trim(points[2]);
+            var d_1 = +trim(points[3]);
+            if (isNaN(a_1 + b_1 + c_1 + d_1)) {
+                return;
+            }
+            var roots_1 = [];
+            return function (p) {
+                return p <= 0
+                    ? 0 : p >= 1
+                    ? 1
+                    : cubicRootAt(0, a_1, c_1, 1, p, roots_1) && cubicAt(0, b_1, d_1, 1, roots_1[0]);
+            };
+        }
+    }
+
+    var Clip = (function () {
+        function Clip(opts) {
+            this._inited = false;
+            this._startTime = 0;
+            this._pausedTime = 0;
+            this._paused = false;
+            this._life = opts.life || 1000;
+            this._delay = opts.delay || 0;
+            this.loop = opts.loop || false;
+            this.onframe = opts.onframe || noop;
+            this.ondestroy = opts.ondestroy || noop;
+            this.onrestart = opts.onrestart || noop;
+            opts.easing && this.setEasing(opts.easing);
+        }
+        Clip.prototype.step = function (globalTime, deltaTime) {
+            if (!this._inited) {
+                this._startTime = globalTime + this._delay;
+                this._inited = true;
+            }
+            if (this._paused) {
+                this._pausedTime += deltaTime;
+                return;
+            }
+            var life = this._life;
+            var elapsedTime = globalTime - this._startTime - this._pausedTime;
+            var percent = elapsedTime / life;
+            if (percent < 0) {
+                percent = 0;
+            }
+            percent = Math.min(percent, 1);
+            var easingFunc = this.easingFunc;
+            var schedule = easingFunc ? easingFunc(percent) : percent;
+            this.onframe(schedule);
+            if (percent === 1) {
+                if (this.loop) {
+                    var remainder = elapsedTime % life;
+                    this._startTime = globalTime - remainder;
+                    this._pausedTime = 0;
+                    this.onrestart();
+                }
+                else {
+                    return true;
+                }
+            }
+            return false;
+        };
+        Clip.prototype.pause = function () {
+            this._paused = true;
+        };
+        Clip.prototype.resume = function () {
+            this._paused = false;
+        };
+        Clip.prototype.setEasing = function (easing) {
+            this.easing = easing;
+            this.easingFunc = isFunction(easing)
+                ? easing
+                : easingFuncs[easing] || createCubicEasingFunc(easing);
+        };
+        return Clip;
+    }());
+
+    var Entry = (function () {
+        function Entry(val) {
+            this.value = val;
+        }
+        return Entry;
+    }());
+    var LinkedList = (function () {
+        function LinkedList() {
+            this._len = 0;
+        }
+        LinkedList.prototype.insert = function (val) {
+            var entry = new Entry(val);
+            this.insertEntry(entry);
+            return entry;
+        };
+        LinkedList.prototype.insertEntry = function (entry) {
+            if (!this.head) {
+                this.head = this.tail = entry;
+            }
+            else {
+                this.tail.next = entry;
+                entry.prev = this.tail;
+                entry.next = null;
+                this.tail = entry;
+            }
+            this._len++;
+        };
+        LinkedList.prototype.remove = function (entry) {
+            var prev = entry.prev;
+            var next = entry.next;
+            if (prev) {
+                prev.next = next;
+            }
+            else {
+                this.head = next;
+            }
+            if (next) {
+                next.prev = prev;
+            }
+            else {
+                this.tail = prev;
+            }
+            entry.next = entry.prev = null;
+            this._len--;
+        };
+        LinkedList.prototype.len = function () {
+            return this._len;
+        };
+        LinkedList.prototype.clear = function () {
+            this.head = this.tail = null;
+            this._len = 0;
+        };
+        return LinkedList;
+    }());
+    var LRU = (function () {
+        function LRU(maxSize) {
+            this._list = new LinkedList();
+            this._maxSize = 10;
+            this._map = {};
+            this._maxSize = maxSize;
+        }
+        LRU.prototype.put = function (key, value) {
+            var list = this._list;
+            var map = this._map;
+            var removed = null;
+            if (map[key] == null) {
+                var len = list.len();
+                var entry = this._lastRemovedEntry;
+                if (len >= this._maxSize && len > 0) {
+                    var leastUsedEntry = list.head;
+                    list.remove(leastUsedEntry);
+                    delete map[leastUsedEntry.key];
+                    removed = leastUsedEntry.value;
+                    this._lastRemovedEntry = leastUsedEntry;
+                }
+                if (entry) {
+                    entry.value = value;
+                }
+                else {
+                    entry = new Entry(value);
+                }
+                entry.key = key;
+                list.insertEntry(entry);
+                map[key] = entry;
+            }
+            return removed;
+        };
+        LRU.prototype.get = function (key) {
+            var entry = this._map[key];
+            var list = this._list;
+            if (entry != null) {
+                if (entry !== list.tail) {
+                    list.remove(entry);
+                    list.insertEntry(entry);
+                }
+                return entry.value;
+            }
+        };
+        LRU.prototype.clear = function () {
+            this._list.clear();
+            this._map = {};
+        };
+        LRU.prototype.len = function () {
+            return this._list.len();
+        };
+        return LRU;
+    }());
+
+    var kCSSColorTable = {
+        'transparent': [0, 0, 0, 0], 'aliceblue': [240, 248, 255, 1],
+        'antiquewhite': [250, 235, 215, 1], 'aqua': [0, 255, 255, 1],
+        'aquamarine': [127, 255, 212, 1], 'azure': [240, 255, 255, 1],
+        'beige': [245, 245, 220, 1], 'bisque': [255, 228, 196, 1],
+        'black': [0, 0, 0, 1], 'blanchedalmond': [255, 235, 205, 1],
+        'blue': [0, 0, 255, 1], 'blueviolet': [138, 43, 226, 1],
+        'brown': [165, 42, 42, 1], 'burlywood': [222, 184, 135, 1],
+        'cadetblue': [95, 158, 160, 1], 'chartreuse': [127, 255, 0, 1],
+        'chocolate': [210, 105, 30, 1], 'coral': [255, 127, 80, 1],
+        'cornflowerblue': [100, 149, 237, 1], 'cornsilk': [255, 248, 220, 1],
+        'crimson': [220, 20, 60, 1], 'cyan': [0, 255, 255, 1],
+        'darkblue': [0, 0, 139, 1], 'darkcyan': [0, 139, 139, 1],
+        'darkgoldenrod': [184, 134, 11, 1], 'darkgray': [169, 169, 169, 1],
+        'darkgreen': [0, 100, 0, 1], 'darkgrey': [169, 169, 169, 1],
+        'darkkhaki': [189, 183, 107, 1], 'darkmagenta': [139, 0, 139, 1],
+        'darkolivegreen': [85, 107, 47, 1], 'darkorange': [255, 140, 0, 1],
+        'darkorchid': [153, 50, 204, 1], 'darkred': [139, 0, 0, 1],
+        'darksalmon': [233, 150, 122, 1], 'darkseagreen': [143, 188, 143, 1],
+        'darkslateblue': [72, 61, 139, 1], 'darkslategray': [47, 79, 79, 1],
+        'darkslategrey': [47, 79, 79, 1], 'darkturquoise': [0, 206, 209, 1],
+        'darkviolet': [148, 0, 211, 1], 'deeppink': [255, 20, 147, 1],
+        'deepskyblue': [0, 191, 255, 1], 'dimgray': [105, 105, 105, 1],
+        'dimgrey': [105, 105, 105, 1], 'dodgerblue': [30, 144, 255, 1],
+        'firebrick': [178, 34, 34, 1], 'floralwhite': [255, 250, 240, 1],
+        'forestgreen': [34, 139, 34, 1], 'fuchsia': [255, 0, 255, 1],
+        'gainsboro': [220, 220, 220, 1], 'ghostwhite': [248, 248, 255, 1],
+        'gold': [255, 215, 0, 1], 'goldenrod': [218, 165, 32, 1],
+        'gray': [128, 128, 128, 1], 'green': [0, 128, 0, 1],
+        'greenyellow': [173, 255, 47, 1], 'grey': [128, 128, 128, 1],
+        'honeydew': [240, 255, 240, 1], 'hotpink': [255, 105, 180, 1],
+        'indianred': [205, 92, 92, 1], 'indigo': [75, 0, 130, 1],
+        'ivory': [255, 255, 240, 1], 'khaki': [240, 230, 140, 1],
+        'lavender': [230, 230, 250, 1], 'lavenderblush': [255, 240, 245, 1],
+        'lawngreen': [124, 252, 0, 1], 'lemonchiffon': [255, 250, 205, 1],
+        'lightblue': [173, 216, 230, 1], 'lightcoral': [240, 128, 128, 1],
+        'lightcyan': [224, 255, 255, 1], 'lightgoldenrodyellow': [250, 250, 210, 1],
+        'lightgray': [211, 211, 211, 1], 'lightgreen': [144, 238, 144, 1],
+        'lightgrey': [211, 211, 211, 1], 'lightpink': [255, 182, 193, 1],
+        'lightsalmon': [255, 160, 122, 1], 'lightseagreen': [32, 178, 170, 1],
+        'lightskyblue': [135, 206, 250, 1], 'lightslategray': [119, 136, 153, 1],
+        'lightslategrey': [119, 136, 153, 1], 'lightsteelblue': [176, 196, 222, 1],
+        'lightyellow': [255, 255, 224, 1], 'lime': [0, 255, 0, 1],
+        'limegreen': [50, 205, 50, 1], 'linen': [250, 240, 230, 1],
+        'magenta': [255, 0, 255, 1], 'maroon': [128, 0, 0, 1],
+        'mediumaquamarine': [102, 205, 170, 1], 'mediumblue': [0, 0, 205, 1],
+        'mediumorchid': [186, 85, 211, 1], 'mediumpurple': [147, 112, 219, 1],
+        'mediumseagreen': [60, 179, 113, 1], 'mediumslateblue': [123, 104, 238, 1],
+        'mediumspringgreen': [0, 250, 154, 1], 'mediumturquoise': [72, 209, 204, 1],
+        'mediumvioletred': [199, 21, 133, 1], 'midnightblue': [25, 25, 112, 1],
+        'mintcream': [245, 255, 250, 1], 'mistyrose': [255, 228, 225, 1],
+        'moccasin': [255, 228, 181, 1], 'navajowhite': [255, 222, 173, 1],
+        'navy': [0, 0, 128, 1], 'oldlace': [253, 245, 230, 1],
+        'olive': [128, 128, 0, 1], 'olivedrab': [107, 142, 35, 1],
+        'orange': [255, 165, 0, 1], 'orangered': [255, 69, 0, 1],
+        'orchid': [218, 112, 214, 1], 'palegoldenrod': [238, 232, 170, 1],
+        'palegreen': [152, 251, 152, 1], 'paleturquoise': [175, 238, 238, 1],
+        'palevioletred': [219, 112, 147, 1], 'papayawhip': [255, 239, 213, 1],
+        'peachpuff': [255, 218, 185, 1], 'peru': [205, 133, 63, 1],
+        'pink': [255, 192, 203, 1], 'plum': [221, 160, 221, 1],
+        'powderblue': [176, 224, 230, 1], 'purple': [128, 0, 128, 1],
+        'red': [255, 0, 0, 1], 'rosybrown': [188, 143, 143, 1],
+        'royalblue': [65, 105, 225, 1], 'saddlebrown': [139, 69, 19, 1],
+        'salmon': [250, 128, 114, 1], 'sandybrown': [244, 164, 96, 1],
+        'seagreen': [46, 139, 87, 1], 'seashell': [255, 245, 238, 1],
+        'sienna': [160, 82, 45, 1], 'silver': [192, 192, 192, 1],
+        'skyblue': [135, 206, 235, 1], 'slateblue': [106, 90, 205, 1],
+        'slategray': [112, 128, 144, 1], 'slategrey': [112, 128, 144, 1],
+        'snow': [255, 250, 250, 1], 'springgreen': [0, 255, 127, 1],
+        'steelblue': [70, 130, 180, 1], 'tan': [210, 180, 140, 1],
+        'teal': [0, 128, 128, 1], 'thistle': [216, 191, 216, 1],
+        'tomato': [255, 99, 71, 1], 'turquoise': [64, 224, 208, 1],
+        'violet': [238, 130, 238, 1], 'wheat': [245, 222, 179, 1],
+        'white': [255, 255, 255, 1], 'whitesmoke': [245, 245, 245, 1],
+        'yellow': [255, 255, 0, 1], 'yellowgreen': [154, 205, 50, 1]
+    };
+    function clampCssByte(i) {
+        i = Math.round(i);
+        return i < 0 ? 0 : i > 255 ? 255 : i;
+    }
+    function clampCssAngle(i) {
+        i = Math.round(i);
+        return i < 0 ? 0 : i > 360 ? 360 : i;
+    }
+    function clampCssFloat(f) {
+        return f < 0 ? 0 : f > 1 ? 1 : f;
+    }
+    function parseCssInt(val) {
+        var str = val;
+        if (str.length && str.charAt(str.length - 1) === '%') {
+            return clampCssByte(parseFloat(str) / 100 * 255);
+        }
+        return clampCssByte(parseInt(str, 10));
+    }
+    function parseCssFloat(val) {
+        var str = val;
+        if (str.length && str.charAt(str.length - 1) === '%') {
+            return clampCssFloat(parseFloat(str) / 100);
+        }
+        return clampCssFloat(parseFloat(str));
+    }
+    function cssHueToRgb(m1, m2, h) {
+        if (h < 0) {
+            h += 1;
+        }
+        else if (h > 1) {
+            h -= 1;
+        }
+        if (h * 6 < 1) {
+            return m1 + (m2 - m1) * h * 6;
+        }
+        if (h * 2 < 1) {
+            return m2;
+        }
+        if (h * 3 < 2) {
+            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+        }
+        return m1;
+    }
+    function lerpNumber(a, b, p) {
+        return a + (b - a) * p;
+    }
+    function setRgba(out, r, g, b, a) {
+        out[0] = r;
+        out[1] = g;
+        out[2] = b;
+        out[3] = a;
+        return out;
+    }
+    function copyRgba(out, a) {
+        out[0] = a[0];
+        out[1] = a[1];
+        out[2] = a[2];
+        out[3] = a[3];
+        return out;
+    }
+    var colorCache = new LRU(20);
+    var lastRemovedArr = null;
+    function putToCache(colorStr, rgbaArr) {
+        if (lastRemovedArr) {
+            copyRgba(lastRemovedArr, rgbaArr);
+        }
+        lastRemovedArr = colorCache.put(colorStr, lastRemovedArr || (rgbaArr.slice()));
+    }
+    function parse(colorStr, rgbaArr) {
+        if (!colorStr) {
+            return;
+        }
+        rgbaArr = rgbaArr || [];
+        var cached = colorCache.get(colorStr);
+        if (cached) {
+            return copyRgba(rgbaArr, cached);
+        }
+        colorStr = colorStr + '';
+        var str = colorStr.replace(/ /g, '').toLowerCase();
+        if (str in kCSSColorTable) {
+            copyRgba(rgbaArr, kCSSColorTable[str]);
+            putToCache(colorStr, rgbaArr);
+            return rgbaArr;
+        }
+        var strLen = str.length;
+        if (str.charAt(0) === '#') {
+            if (strLen === 4 || strLen === 5) {
+                var iv = parseInt(str.slice(1, 4), 16);
+                if (!(iv >= 0 && iv <= 0xfff)) {
+                    setRgba(rgbaArr, 0, 0, 0, 1);
+                    return;
+                }
+                setRgba(rgbaArr, ((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8), (iv & 0xf0) | ((iv & 0xf0) >> 4), (iv & 0xf) | ((iv & 0xf) << 4), strLen === 5 ? parseInt(str.slice(4), 16) / 0xf : 1);
+                putToCache(colorStr, rgbaArr);
+                return rgbaArr;
+            }
+            else if (strLen === 7 || strLen === 9) {
+                var iv = parseInt(str.slice(1, 7), 16);
+                if (!(iv >= 0 && iv <= 0xffffff)) {
+                    setRgba(rgbaArr, 0, 0, 0, 1);
+                    return;
+                }
+                setRgba(rgbaArr, (iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, strLen === 9 ? parseInt(str.slice(7), 16) / 0xff : 1);
+                putToCache(colorStr, rgbaArr);
+                return rgbaArr;
+            }
+            return;
+        }
+        var op = str.indexOf('(');
+        var ep = str.indexOf(')');
+        if (op !== -1 && ep + 1 === strLen) {
+            var fname = str.substr(0, op);
+            var params = str.substr(op + 1, ep - (op + 1)).split(',');
+            var alpha = 1;
+            switch (fname) {
+                case 'rgba':
+                    if (params.length !== 4) {
+                        return params.length === 3
+                            ? setRgba(rgbaArr, +params[0], +params[1], +params[2], 1)
+                            : setRgba(rgbaArr, 0, 0, 0, 1);
+                    }
+                    alpha = parseCssFloat(params.pop());
+                case 'rgb':
+                    if (params.length >= 3) {
+                        setRgba(rgbaArr, parseCssInt(params[0]), parseCssInt(params[1]), parseCssInt(params[2]), params.length === 3 ? alpha : parseCssFloat(params[3]));
+                        putToCache(colorStr, rgbaArr);
+                        return rgbaArr;
+                    }
+                    else {
+                        setRgba(rgbaArr, 0, 0, 0, 1);
+                        return;
+                    }
+                case 'hsla':
+                    if (params.length !== 4) {
+                        setRgba(rgbaArr, 0, 0, 0, 1);
+                        return;
+                    }
+                    params[3] = parseCssFloat(params[3]);
+                    hsla2rgba(params, rgbaArr);
+                    putToCache(colorStr, rgbaArr);
+                    return rgbaArr;
+                case 'hsl':
+                    if (params.length !== 3) {
+                        setRgba(rgbaArr, 0, 0, 0, 1);
+                        return;
+                    }
+                    hsla2rgba(params, rgbaArr);
+                    putToCache(colorStr, rgbaArr);
+                    return rgbaArr;
+                default:
+                    return;
+            }
+        }
+        setRgba(rgbaArr, 0, 0, 0, 1);
+        return;
+    }
+    function hsla2rgba(hsla, rgba) {
+        var h = (((parseFloat(hsla[0]) % 360) + 360) % 360) / 360;
+        var s = parseCssFloat(hsla[1]);
+        var l = parseCssFloat(hsla[2]);
+        var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
+        var m1 = l * 2 - m2;
+        rgba = rgba || [];
+        setRgba(rgba, clampCssByte(cssHueToRgb(m1, m2, h + 1 / 3) * 255), clampCssByte(cssHueToRgb(m1, m2, h) * 255), clampCssByte(cssHueToRgb(m1, m2, h - 1 / 3) * 255), 1);
+        if (hsla.length === 4) {
+            rgba[3] = hsla[3];
+        }
+        return rgba;
+    }
+    function rgba2hsla(rgba) {
+        if (!rgba) {
+            return;
+        }
+        var R = rgba[0] / 255;
+        var G = rgba[1] / 255;
+        var B = rgba[2] / 255;
+        var vMin = Math.min(R, G, B);
+        var vMax = Math.max(R, G, B);
+        var delta = vMax - vMin;
+        var L = (vMax + vMin) / 2;
+        var H;
+        var S;
+        if (delta === 0) {
+            H = 0;
+            S = 0;
+        }
+        else {
+            if (L < 0.5) {
+                S = delta / (vMax + vMin);
+            }
+            else {
+                S = delta / (2 - vMax - vMin);
+            }
+            var deltaR = (((vMax - R) / 6) + (delta / 2)) / delta;
+            var deltaG = (((vMax - G) / 6) + (delta / 2)) / delta;
+            var deltaB = (((vMax - B) / 6) + (delta / 2)) / delta;
+            if (R === vMax) {
+                H = deltaB - deltaG;
+            }
+            else if (G === vMax) {
+                H = (1 / 3) + deltaR - deltaB;
+            }
+            else if (B === vMax) {
+                H = (2 / 3) + deltaG - deltaR;
+            }
+            if (H < 0) {
+                H += 1;
+            }
+            if (H > 1) {
+                H -= 1;
+            }
+        }
+        var hsla = [H * 360, S, L];
+        if (rgba[3] != null) {
+            hsla.push(rgba[3]);
+        }
+        return hsla;
+    }
+    function lift(color, level) {
+        var colorArr = parse(color);
+        if (colorArr) {
+            for (var i = 0; i < 3; i++) {
+                if (level < 0) {
+                    colorArr[i] = colorArr[i] * (1 - level) | 0;
+                }
+                else {
+                    colorArr[i] = ((255 - colorArr[i]) * level + colorArr[i]) | 0;
+                }
+                if (colorArr[i] > 255) {
+                    colorArr[i] = 255;
+                }
+                else if (colorArr[i] < 0) {
+                    colorArr[i] = 0;
+                }
+            }
+            return stringify(colorArr, colorArr.length === 4 ? 'rgba' : 'rgb');
+        }
+    }
+    function toHex(color) {
+        var colorArr = parse(color);
+        if (colorArr) {
+            return ((1 << 24) + (colorArr[0] << 16) + (colorArr[1] << 8) + (+colorArr[2])).toString(16).slice(1);
+        }
+    }
+    function fastLerp(normalizedValue, colors, out) {
+        if (!(colors && colors.length)
+            || !(normalizedValue >= 0 && normalizedValue <= 1)) {
+            return;
+        }
+        out = out || [];
+        var value = normalizedValue * (colors.length - 1);
+        var leftIndex = Math.floor(value);
+        var rightIndex = Math.ceil(value);
+        var leftColor = colors[leftIndex];
+        var rightColor = colors[rightIndex];
+        var dv = value - leftIndex;
+        out[0] = clampCssByte(lerpNumber(leftColor[0], rightColor[0], dv));
+        out[1] = clampCssByte(lerpNumber(leftColor[1], rightColor[1], dv));
+        out[2] = clampCssByte(lerpNumber(leftColor[2], rightColor[2], dv));
+        out[3] = clampCssFloat(lerpNumber(leftColor[3], rightColor[3], dv));
+        return out;
+    }
+    var fastMapToColor = fastLerp;
+    function lerp$1(normalizedValue, colors, fullOutput) {
+        if (!(colors && colors.length)
+            || !(normalizedValue >= 0 && normalizedValue <= 1)) {
+            return;
+        }
+        var value = normalizedValue * (colors.length - 1);
+        var leftIndex = Math.floor(value);
+        var rightIndex = Math.ceil(value);
+        var leftColor = parse(colors[leftIndex]);
+        var rightColor = parse(colors[rightIndex]);
+        var dv = value - leftIndex;
+        var color = stringify([
+            clampCssByte(lerpNumber(leftColor[0], rightColor[0], dv)),
+            clampCssByte(lerpNumber(leftColor[1], rightColor[1], dv)),
+            clampCssByte(lerpNumber(leftColor[2], rightColor[2], dv)),
+            clampCssFloat(lerpNumber(leftColor[3], rightColor[3], dv))
+        ], 'rgba');
+        return fullOutput
+            ? {
+                color: color,
+                leftIndex: leftIndex,
+                rightIndex: rightIndex,
+                value: value
+            }
+            : color;
+    }
+    var mapToColor = lerp$1;
+    function modifyHSL(color, h, s, l) {
+        var colorArr = parse(color);
+        if (color) {
+            colorArr = rgba2hsla(colorArr);
+            h != null && (colorArr[0] = clampCssAngle(h));
+            s != null && (colorArr[1] = parseCssFloat(s));
+            l != null && (colorArr[2] = parseCssFloat(l));
+            return stringify(hsla2rgba(colorArr), 'rgba');
+        }
+    }
+    function modifyAlpha(color, alpha) {
+        var colorArr = parse(color);
+        if (colorArr && alpha != null) {
+            colorArr[3] = clampCssFloat(alpha);
+            return stringify(colorArr, 'rgba');
+        }
+    }
+    function stringify(arrColor, type) {
+        if (!arrColor || !arrColor.length) {
+            return;
+        }
+        var colorStr = arrColor[0] + ',' + arrColor[1] + ',' + arrColor[2];
+        if (type === 'rgba' || type === 'hsva' || type === 'hsla') {
+            colorStr += ',' + arrColor[3];
+        }
+        return type + '(' + colorStr + ')';
+    }
+    function lum(color, backgroundLum) {
+        var arr = parse(color);
+        return arr
+            ? (0.299 * arr[0] + 0.587 * arr[1] + 0.114 * arr[2]) * arr[3] / 255
+                + (1 - arr[3]) * backgroundLum
+            : 0;
+    }
+    function random() {
+        return stringify([
+            Math.round(Math.random() * 255),
+            Math.round(Math.random() * 255),
+            Math.round(Math.random() * 255)
+        ], 'rgb');
+    }
+    var liftedColorCache = new LRU(100);
+    function liftColor(color) {
+        if (isString(color)) {
+            var liftedColor = liftedColorCache.get(color);
+            if (!liftedColor) {
+                liftedColor = lift(color, -0.1);
+                liftedColorCache.put(color, liftedColor);
+            }
+            return liftedColor;
+        }
+        else if (isGradientObject(color)) {
+            var ret = extend({}, color);
+            ret.colorStops = map(color.colorStops, function (stop) { return ({
+                offset: stop.offset,
+                color: lift(stop.color, -0.1)
+            }); });
+            return ret;
+        }
+        return color;
+    }
+
+    var color = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        parse: parse,
+        lift: lift,
+        toHex: toHex,
+        fastLerp: fastLerp,
+        fastMapToColor: fastMapToColor,
+        lerp: lerp$1,
+        mapToColor: mapToColor,
+        modifyHSL: modifyHSL,
+        modifyAlpha: modifyAlpha,
+        stringify: stringify,
+        lum: lum,
+        random: random,
+        liftColor: liftColor
+    });
+
+    var mathRound = Math.round;
+    function normalizeColor(color) {
+        var opacity;
+        if (!color || color === 'transparent') {
+            color = 'none';
+        }
+        else if (typeof color === 'string' && color.indexOf('rgba') > -1) {
+            var arr = parse(color);
+            if (arr) {
+                color = 'rgb(' + arr[0] + ',' + arr[1] + ',' + arr[2] + ')';
+                opacity = arr[3];
+            }
+        }
+        return {
+            color: color,
+            opacity: opacity == null ? 1 : opacity
+        };
+    }
+    var EPSILON$2 = 1e-4;
+    function isAroundZero$1(transform) {
+        return transform < EPSILON$2 && transform > -EPSILON$2;
+    }
+    function round3(transform) {
+        return mathRound(transform * 1e3) / 1e3;
+    }
+    function round4(transform) {
+        return mathRound(transform * 1e4) / 1e4;
+    }
+    function getMatrixStr(m) {
+        return 'matrix('
+            + round3(m[0]) + ','
+            + round3(m[1]) + ','
+            + round3(m[2]) + ','
+            + round3(m[3]) + ','
+            + round4(m[4]) + ','
+            + round4(m[5])
+            + ')';
+    }
+    var TEXT_ALIGN_TO_ANCHOR = {
+        left: 'start',
+        right: 'end',
+        center: 'middle',
+        middle: 'middle'
+    };
+    function adjustTextY(y, lineHeight, textBaseline) {
+        if (textBaseline === 'top') {
+            y += lineHeight / 2;
+        }
+        else if (textBaseline === 'bottom') {
+            y -= lineHeight / 2;
+        }
+        return y;
+    }
+    function hasShadow(style) {
+        return style
+            && (style.shadowBlur || style.shadowOffsetX || style.shadowOffsetY);
+    }
+    function getShadowKey(displayable) {
+        var style = displayable.style;
+        var globalScale = displayable.getGlobalScale();
+        return [
+            style.shadowColor,
+            (style.shadowBlur || 0).toFixed(2),
+            (style.shadowOffsetX || 0).toFixed(2),
+            (style.shadowOffsetY || 0).toFixed(2),
+            globalScale[0],
+            globalScale[1]
+        ].join(',');
+    }
+    function isImagePattern(val) {
+        return val && (!!val.image);
+    }
+    function isSVGPattern(val) {
+        return val && (!!val.svgElement);
+    }
+    function isPattern(val) {
+        return isImagePattern(val) || isSVGPattern(val);
+    }
+    function isLinearGradient(val) {
+        return val.type === 'linear';
+    }
+    function isRadialGradient(val) {
+        return val.type === 'radial';
+    }
+    function isGradient(val) {
+        return val && (val.type === 'linear'
+            || val.type === 'radial');
+    }
+    function getIdURL(id) {
+        return "url(#".concat(id, ")");
+    }
+    function getPathPrecision(el) {
+        var scale = el.getGlobalScale();
+        var size = Math.max(scale[0], scale[1]);
+        return Math.max(Math.ceil(Math.log(size) / Math.log(10)), 1);
+    }
+    function getSRTTransformString(transform) {
+        var x = transform.x || 0;
+        var y = transform.y || 0;
+        var rotation = (transform.rotation || 0) * RADIAN_TO_DEGREE;
+        var scaleX = retrieve2(transform.scaleX, 1);
+        var scaleY = retrieve2(transform.scaleY, 1);
+        var skewX = transform.skewX || 0;
+        var skewY = transform.skewY || 0;
+        var res = [];
+        if (x || y) {
+            res.push("translate(".concat(x, "px,").concat(y, "px)"));
+        }
+        if (rotation) {
+            res.push("rotate(".concat(rotation, ")"));
+        }
+        if (scaleX !== 1 || scaleY !== 1) {
+            res.push("scale(".concat(scaleX, ",").concat(scaleY, ")"));
+        }
+        if (skewX || skewY) {
+            res.push("skew(".concat(mathRound(skewX * RADIAN_TO_DEGREE), "deg, ").concat(mathRound(skewY * RADIAN_TO_DEGREE), "deg)"));
+        }
+        return res.join(' ');
+    }
+    var encodeBase64 = (function () {
+        if (env.hasGlobalWindow && isFunction(window.btoa)) {
+            return function (str) {
+                return window.btoa(unescape(encodeURIComponent(str)));
+            };
+        }
+        if (typeof Buffer !== 'undefined') {
+            return function (str) {
+                return Buffer.from(str).toString('base64');
+            };
+        }
+        return function (str) {
+            {
+                logError('Base64 isn\'t natively supported in the current environment.');
+            }
+            return null;
+        };
+    })();
+
+    var arraySlice = Array.prototype.slice;
+    function interpolateNumber(p0, p1, percent) {
+        return (p1 - p0) * percent + p0;
+    }
+    function interpolate1DArray(out, p0, p1, percent) {
+        var len = p0.length;
+        for (var i = 0; i < len; i++) {
+            out[i] = interpolateNumber(p0[i], p1[i], percent);
+        }
+        return out;
+    }
+    function interpolate2DArray(out, p0, p1, percent) {
+        var len = p0.length;
+        var len2 = len && p0[0].length;
+        for (var i = 0; i < len; i++) {
+            if (!out[i]) {
+                out[i] = [];
+            }
+            for (var j = 0; j < len2; j++) {
+                out[i][j] = interpolateNumber(p0[i][j], p1[i][j], percent);
+            }
+        }
+        return out;
+    }
+    function add1DArray(out, p0, p1, sign) {
+        var len = p0.length;
+        for (var i = 0; i < len; i++) {
+            out[i] = p0[i] + p1[i] * sign;
+        }
+        return out;
+    }
+    function add2DArray(out, p0, p1, sign) {
+        var len = p0.length;
+        var len2 = len && p0[0].length;
+        for (var i = 0; i < len; i++) {
+            if (!out[i]) {
+                out[i] = [];
+            }
+            for (var j = 0; j < len2; j++) {
+                out[i][j] = p0[i][j] + p1[i][j] * sign;
+            }
+        }
+        return out;
+    }
+    function fillColorStops(val0, val1) {
+        var len0 = val0.length;
+        var len1 = val1.length;
+        var shorterArr = len0 > len1 ? val1 : val0;
+        var shorterLen = Math.min(len0, len1);
+        var last = shorterArr[shorterLen - 1] || { color: [0, 0, 0, 0], offset: 0 };
+        for (var i = shorterLen; i < Math.max(len0, len1); i++) {
+            shorterArr.push({
+                offset: last.offset,
+                color: last.color.slice()
+            });
+        }
+    }
+    function fillArray(val0, val1, arrDim) {
+        var arr0 = val0;
+        var arr1 = val1;
+        if (!arr0.push || !arr1.push) {
+            return;
+        }
+        var arr0Len = arr0.length;
+        var arr1Len = arr1.length;
+        if (arr0Len !== arr1Len) {
+            var isPreviousLarger = arr0Len > arr1Len;
+            if (isPreviousLarger) {
+                arr0.length = arr1Len;
+            }
+            else {
+                for (var i = arr0Len; i < arr1Len; i++) {
+                    arr0.push(arrDim === 1 ? arr1[i] : arraySlice.call(arr1[i]));
+                }
+            }
+        }
+        var len2 = arr0[0] && arr0[0].length;
+        for (var i = 0; i < arr0.length; i++) {
+            if (arrDim === 1) {
+                if (isNaN(arr0[i])) {
+                    arr0[i] = arr1[i];
+                }
+            }
+            else {
+                for (var j = 0; j < len2; j++) {
+                    if (isNaN(arr0[i][j])) {
+                        arr0[i][j] = arr1[i][j];
+                    }
+                }
+            }
+        }
+    }
+    function cloneValue(value) {
+        if (isArrayLike(value)) {
+            var len = value.length;
+            if (isArrayLike(value[0])) {
+                var ret = [];
+                for (var i = 0; i < len; i++) {
+                    ret.push(arraySlice.call(value[i]));
+                }
+                return ret;
+            }
+            return arraySlice.call(value);
+        }
+        return value;
+    }
+    function rgba2String(rgba) {
+        rgba[0] = Math.floor(rgba[0]) || 0;
+        rgba[1] = Math.floor(rgba[1]) || 0;
+        rgba[2] = Math.floor(rgba[2]) || 0;
+        rgba[3] = rgba[3] == null ? 1 : rgba[3];
+        return 'rgba(' + rgba.join(',') + ')';
+    }
+    function guessArrayDim(value) {
+        return isArrayLike(value && value[0]) ? 2 : 1;
+    }
+    var VALUE_TYPE_NUMBER = 0;
+    var VALUE_TYPE_1D_ARRAY = 1;
+    var VALUE_TYPE_2D_ARRAY = 2;
+    var VALUE_TYPE_COLOR = 3;
+    var VALUE_TYPE_LINEAR_GRADIENT = 4;
+    var VALUE_TYPE_RADIAL_GRADIENT = 5;
+    var VALUE_TYPE_UNKOWN = 6;
+    function isGradientValueType(valType) {
+        return valType === VALUE_TYPE_LINEAR_GRADIENT || valType === VALUE_TYPE_RADIAL_GRADIENT;
+    }
+    function isArrayValueType(valType) {
+        return valType === VALUE_TYPE_1D_ARRAY || valType === VALUE_TYPE_2D_ARRAY;
+    }
+    var tmpRgba = [0, 0, 0, 0];
+    var Track = (function () {
+        function Track(propName) {
+            this.keyframes = [];
+            this.discrete = false;
+            this._invalid = false;
+            this._needsSort = false;
+            this._lastFr = 0;
+            this._lastFrP = 0;
+            this.propName = propName;
+        }
+        Track.prototype.isFinished = function () {
+            return this._finished;
+        };
+        Track.prototype.setFinished = function () {
+            this._finished = true;
+            if (this._additiveTrack) {
+                this._additiveTrack.setFinished();
+            }
+        };
+        Track.prototype.needsAnimate = function () {
+            return this.keyframes.length >= 1;
+        };
+        Track.prototype.getAdditiveTrack = function () {
+            return this._additiveTrack;
+        };
+        Track.prototype.addKeyframe = function (time, rawValue, easing) {
+            this._needsSort = true;
+            var keyframes = this.keyframes;
+            var len = keyframes.length;
+            var discrete = false;
+            var valType = VALUE_TYPE_UNKOWN;
+            var value = rawValue;
+            if (isArrayLike(rawValue)) {
+                var arrayDim = guessArrayDim(rawValue);
+                valType = arrayDim;
+                if (arrayDim === 1 && !isNumber(rawValue[0])
+                    || arrayDim === 2 && !isNumber(rawValue[0][0])) {
+                    discrete = true;
+                }
+            }
+            else {
+                if (isNumber(rawValue) && !eqNaN(rawValue)) {
+                    valType = VALUE_TYPE_NUMBER;
+                }
+                else if (isString(rawValue)) {
+                    if (!isNaN(+rawValue)) {
+                        valType = VALUE_TYPE_NUMBER;
+                    }
+                    else {
+                        var colorArray = parse(rawValue);
+                        if (colorArray) {
+                            value = colorArray;
+                            valType = VALUE_TYPE_COLOR;
+                        }
+                    }
+                }
+                else if (isGradientObject(rawValue)) {
+                    var parsedGradient = extend({}, value);
+                    parsedGradient.colorStops = map(rawValue.colorStops, function (colorStop) { return ({
+                        offset: colorStop.offset,
+                        color: parse(colorStop.color)
+                    }); });
+                    if (isLinearGradient(rawValue)) {
+                        valType = VALUE_TYPE_LINEAR_GRADIENT;
+                    }
+                    else if (isRadialGradient(rawValue)) {
+                        valType = VALUE_TYPE_RADIAL_GRADIENT;
+                    }
+                    value = parsedGradient;
+                }
+            }
+            if (len === 0) {
+                this.valType = valType;
+            }
+            else if (valType !== this.valType || valType === VALUE_TYPE_UNKOWN) {
+                discrete = true;
+            }
+            this.discrete = this.discrete || discrete;
+            var kf = {
+                time: time,
+                value: value,
+                rawValue: rawValue,
+                percent: 0
+            };
+            if (easing) {
+                kf.easing = easing;
+                kf.easingFunc = isFunction(easing)
+                    ? easing
+                    : easingFuncs[easing] || createCubicEasingFunc(easing);
+            }
+            keyframes.push(kf);
+            return kf;
+        };
+        Track.prototype.prepare = function (maxTime, additiveTrack) {
+            var kfs = this.keyframes;
+            if (this._needsSort) {
+                kfs.sort(function (a, b) {
+                    return a.time - b.time;
+                });
+            }
+            var valType = this.valType;
+            var kfsLen = kfs.length;
+            var lastKf = kfs[kfsLen - 1];
+            var isDiscrete = this.discrete;
+            var isArr = isArrayValueType(valType);
+            var isGradient = isGradientValueType(valType);
+            for (var i = 0; i < kfsLen; i++) {
+                var kf = kfs[i];
+                var value = kf.value;
+                var lastValue = lastKf.value;
+                kf.percent = kf.time / maxTime;
+                if (!isDiscrete) {
+                    if (isArr && i !== kfsLen - 1) {
+                        fillArray(value, lastValue, valType);
+                    }
+                    else if (isGradient) {
+                        fillColorStops(value.colorStops, lastValue.colorStops);
+                    }
+                }
+            }
+            if (!isDiscrete
+                && valType !== VALUE_TYPE_RADIAL_GRADIENT
+                && additiveTrack
+                && this.needsAnimate()
+                && additiveTrack.needsAnimate()
+                && valType === additiveTrack.valType
+                && !additiveTrack._finished) {
+                this._additiveTrack = additiveTrack;
+                var startValue = kfs[0].value;
+                for (var i = 0; i < kfsLen; i++) {
+                    if (valType === VALUE_TYPE_NUMBER) {
+                        kfs[i].additiveValue = kfs[i].value - startValue;
+                    }
+                    else if (valType === VALUE_TYPE_COLOR) {
+                        kfs[i].additiveValue =
+                            add1DArray([], kfs[i].value, startValue, -1);
+                    }
+                    else if (isArrayValueType(valType)) {
+                        kfs[i].additiveValue = valType === VALUE_TYPE_1D_ARRAY
+                            ? add1DArray([], kfs[i].value, startValue, -1)
+                            : add2DArray([], kfs[i].value, startValue, -1);
+                    }
+                }
+            }
+        };
+        Track.prototype.step = function (target, percent) {
+            if (this._finished) {
+                return;
+            }
+            if (this._additiveTrack && this._additiveTrack._finished) {
+                this._additiveTrack = null;
+            }
+            var isAdditive = this._additiveTrack != null;
+            var valueKey = isAdditive ? 'additiveValue' : 'value';
+            var valType = this.valType;
+            var keyframes = this.keyframes;
+            var kfsNum = keyframes.length;
+            var propName = this.propName;
+            var isValueColor = valType === VALUE_TYPE_COLOR;
+            var frameIdx;
+            var lastFrame = this._lastFr;
+            var mathMin = Math.min;
+            var frame;
+            var nextFrame;
+            if (kfsNum === 1) {
+                frame = nextFrame = keyframes[0];
+            }
+            else {
+                if (percent < 0) {
+                    frameIdx = 0;
+                }
+                else if (percent < this._lastFrP) {
+                    var start = mathMin(lastFrame + 1, kfsNum - 1);
+                    for (frameIdx = start; frameIdx >= 0; frameIdx--) {
+                        if (keyframes[frameIdx].percent <= percent) {
+                            break;
+                        }
+                    }
+                    frameIdx = mathMin(frameIdx, kfsNum - 2);
+                }
+                else {
+                    for (frameIdx = lastFrame; frameIdx < kfsNum; frameIdx++) {
+                        if (keyframes[frameIdx].percent > percent) {
+                            break;
+                        }
+                    }
+                    frameIdx = mathMin(frameIdx - 1, kfsNum - 2);
+                }
+                nextFrame = keyframes[frameIdx + 1];
+                frame = keyframes[frameIdx];
+            }
+            if (!(frame && nextFrame)) {
+                return;
+            }
+            this._lastFr = frameIdx;
+            this._lastFrP = percent;
+            var interval = (nextFrame.percent - frame.percent);
+            var w = interval === 0 ? 1 : mathMin((percent - frame.percent) / interval, 1);
+            if (nextFrame.easingFunc) {
+                w = nextFrame.easingFunc(w);
+            }
+            var targetArr = isAdditive ? this._additiveValue
+                : (isValueColor ? tmpRgba : target[propName]);
+            if ((isArrayValueType(valType) || isValueColor) && !targetArr) {
+                targetArr = this._additiveValue = [];
+            }
+            if (this.discrete) {
+                target[propName] = w < 1 ? frame.rawValue : nextFrame.rawValue;
+            }
+            else if (isArrayValueType(valType)) {
+                valType === VALUE_TYPE_1D_ARRAY
+                    ? interpolate1DArray(targetArr, frame[valueKey], nextFrame[valueKey], w)
+                    : interpolate2DArray(targetArr, frame[valueKey], nextFrame[valueKey], w);
+            }
+            else if (isGradientValueType(valType)) {
+                var val = frame[valueKey];
+                var nextVal_1 = nextFrame[valueKey];
+                var isLinearGradient_1 = valType === VALUE_TYPE_LINEAR_GRADIENT;
+                target[propName] = {
+                    type: isLinearGradient_1 ? 'linear' : 'radial',
+                    x: interpolateNumber(val.x, nextVal_1.x, w),
+                    y: interpolateNumber(val.y, nextVal_1.y, w),
+                    colorStops: map(val.colorStops, function (colorStop, idx) {
+                        var nextColorStop = nextVal_1.colorStops[idx];
+                        return {
+                            offset: interpolateNumber(colorStop.offset, nextColorStop.offset, w),
+                            color: rgba2String(interpolate1DArray([], colorStop.color, nextColorStop.color, w))
+                        };
+                    }),
+                    global: nextVal_1.global
+                };
+                if (isLinearGradient_1) {
+                    target[propName].x2 = interpolateNumber(val.x2, nextVal_1.x2, w);
+                    target[propName].y2 = interpolateNumber(val.y2, nextVal_1.y2, w);
+                }
+                else {
+                    target[propName].r = interpolateNumber(val.r, nextVal_1.r, w);
+                }
+            }
+            else if (isValueColor) {
+                interpolate1DArray(targetArr, frame[valueKey], nextFrame[valueKey], w);
+                if (!isAdditive) {
+                    target[propName] = rgba2String(targetArr);
+                }
+            }
+            else {
+                var value = interpolateNumber(frame[valueKey], nextFrame[valueKey], w);
+                if (isAdditive) {
+                    this._additiveValue = value;
+                }
+                else {
+                    target[propName] = value;
+                }
+            }
+            if (isAdditive) {
+                this._addToTarget(target);
+            }
+        };
+        Track.prototype._addToTarget = function (target) {
+            var valType = this.valType;
+            var propName = this.propName;
+            var additiveValue = this._additiveValue;
+            if (valType === VALUE_TYPE_NUMBER) {
+                target[propName] = target[propName] + additiveValue;
+            }
+            else if (valType === VALUE_TYPE_COLOR) {
+                parse(target[propName], tmpRgba);
+                add1DArray(tmpRgba, tmpRgba, additiveValue, 1);
+                target[propName] = rgba2String(tmpRgba);
+            }
+            else if (valType === VALUE_TYPE_1D_ARRAY) {
+                add1DArray(target[propName], target[propName], additiveValue, 1);
+            }
+            else if (valType === VALUE_TYPE_2D_ARRAY) {
+                add2DArray(target[propName], target[propName], additiveValue, 1);
+            }
+        };
+        return Track;
+    }());
+    var Animator = (function () {
+        function Animator(target, loop, allowDiscreteAnimation, additiveTo) {
+            this._tracks = {};
+            this._trackKeys = [];
+            this._maxTime = 0;
+            this._started = 0;
+            this._clip = null;
+            this._target = target;
+            this._loop = loop;
+            if (loop && additiveTo) {
+                logError('Can\' use additive animation on looped animation.');
+                return;
+            }
+            this._additiveAnimators = additiveTo;
+            this._allowDiscrete = allowDiscreteAnimation;
+        }
+        Animator.prototype.getMaxTime = function () {
+            return this._maxTime;
+        };
+        Animator.prototype.getDelay = function () {
+            return this._delay;
+        };
+        Animator.prototype.getLoop = function () {
+            return this._loop;
+        };
+        Animator.prototype.getTarget = function () {
+            return this._target;
+        };
+        Animator.prototype.changeTarget = function (target) {
+            this._target = target;
+        };
+        Animator.prototype.when = function (time, props, easing) {
+            return this.whenWithKeys(time, props, keys(props), easing);
+        };
+        Animator.prototype.whenWithKeys = function (time, props, propNames, easing) {
+            var tracks = this._tracks;
+            for (var i = 0; i < propNames.length; i++) {
+                var propName = propNames[i];
+                var track = tracks[propName];
+                if (!track) {
+                    track = tracks[propName] = new Track(propName);
+                    var initialValue = void 0;
+                    var additiveTrack = this._getAdditiveTrack(propName);
+                    if (additiveTrack) {
+                        var addtiveTrackKfs = additiveTrack.keyframes;
+                        var lastFinalKf = addtiveTrackKfs[addtiveTrackKfs.length - 1];
+                        initialValue = lastFinalKf && lastFinalKf.value;
+                        if (additiveTrack.valType === VALUE_TYPE_COLOR && initialValue) {
+                            initialValue = rgba2String(initialValue);
+                        }
+                    }
+                    else {
+                        initialValue = this._target[propName];
+                    }
+                    if (initialValue == null) {
+                        continue;
+                    }
+                    if (time > 0) {
+                        track.addKeyframe(0, cloneValue(initialValue), easing);
+                    }
+                    this._trackKeys.push(propName);
+                }
+                track.addKeyframe(time, cloneValue(props[propName]), easing);
+            }
+            this._maxTime = Math.max(this._maxTime, time);
+            return this;
+        };
+        Animator.prototype.pause = function () {
+            this._clip.pause();
+            this._paused = true;
+        };
+        Animator.prototype.resume = function () {
+            this._clip.resume();
+            this._paused = false;
+        };
+        Animator.prototype.isPaused = function () {
+            return !!this._paused;
+        };
+        Animator.prototype.duration = function (duration) {
+            this._maxTime = duration;
+            this._force = true;
+            return this;
+        };
+        Animator.prototype._doneCallback = function () {
+            this._setTracksFinished();
+            this._clip = null;
+            var doneList = this._doneCbs;
+            if (doneList) {
+                var len = doneList.length;
+                for (var i = 0; i < len; i++) {
+                    doneList[i].call(this);
+                }
+            }
+        };
+        Animator.prototype._abortedCallback = function () {
+            this._setTracksFinished();
+            var animation = this.animation;
+            var abortedList = this._abortedCbs;
+            if (animation) {
+                animation.removeClip(this._clip);
+            }
+            this._clip = null;
+            if (abortedList) {
+                for (var i = 0; i < abortedList.length; i++) {
+                    abortedList[i].call(this);
+                }
+            }
+        };
+        Animator.prototype._setTracksFinished = function () {
+            var tracks = this._tracks;
+            var tracksKeys = this._trackKeys;
+            for (var i = 0; i < tracksKeys.length; i++) {
+                tracks[tracksKeys[i]].setFinished();
+            }
+        };
+        Animator.prototype._getAdditiveTrack = function (trackName) {
+            var additiveTrack;
+            var additiveAnimators = this._additiveAnimators;
+            if (additiveAnimators) {
+                for (var i = 0; i < additiveAnimators.length; i++) {
+                    var track = additiveAnimators[i].getTrack(trackName);
+                    if (track) {
+                        additiveTrack = track;
+                    }
+                }
+            }
+            return additiveTrack;
+        };
+        Animator.prototype.start = function (easing) {
+            if (this._started > 0) {
+                return;
+            }
+            this._started = 1;
+            var self = this;
+            var tracks = [];
+            var maxTime = this._maxTime || 0;
+            for (var i = 0; i < this._trackKeys.length; i++) {
+                var propName = this._trackKeys[i];
+                var track = this._tracks[propName];
+                var additiveTrack = this._getAdditiveTrack(propName);
+                var kfs = track.keyframes;
+                var kfsNum = kfs.length;
+                track.prepare(maxTime, additiveTrack);
+                if (track.needsAnimate()) {
+                    if (!this._allowDiscrete && track.discrete) {
+                        var lastKf = kfs[kfsNum - 1];
+                        if (lastKf) {
+                            self._target[track.propName] = lastKf.rawValue;
+                        }
+                        track.setFinished();
+                    }
+                    else {
+                        tracks.push(track);
+                    }
+                }
+            }
+            if (tracks.length || this._force) {
+                var clip = new Clip({
+                    life: maxTime,
+                    loop: this._loop,
+                    delay: this._delay || 0,
+                    onframe: function (percent) {
+                        self._started = 2;
+                        var additiveAnimators = self._additiveAnimators;
+                        if (additiveAnimators) {
+                            var stillHasAdditiveAnimator = false;
+                            for (var i = 0; i < additiveAnimators.length; i++) {
+                                if (additiveAnimators[i]._clip) {
+                                    stillHasAdditiveAnimator = true;
+                                    break;
+                                }
+                            }
+                            if (!stillHasAdditiveAnimator) {
+                                self._additiveAnimators = null;
+                            }
+                        }
+                        for (var i = 0; i < tracks.length; i++) {
+                            tracks[i].step(self._target, percent);
+                        }
+                        var onframeList = self._onframeCbs;
+                        if (onframeList) {
+                            for (var i = 0; i < onframeList.length; i++) {
+                                onframeList[i](self._target, percent);
+                            }
+                        }
+                    },
+                    ondestroy: function () {
+                        self._doneCallback();
+                    }
+                });
+                this._clip = clip;
+                if (this.animation) {
+                    this.animation.addClip(clip);
+                }
+                if (easing) {
+                    clip.setEasing(easing);
+                }
+            }
+            else {
+                this._doneCallback();
+            }
+            return this;
+        };
+        Animator.prototype.stop = function (forwardToLast) {
+            if (!this._clip) {
+                return;
+            }
+            var clip = this._clip;
+            if (forwardToLast) {
+                clip.onframe(1);
+            }
+            this._abortedCallback();
+        };
+        Animator.prototype.delay = function (time) {
+            this._delay = time;
+            return this;
+        };
+        Animator.prototype.during = function (cb) {
+            if (cb) {
+                if (!this._onframeCbs) {
+                    this._onframeCbs = [];
+                }
+                this._onframeCbs.push(cb);
+            }
+            return this;
+        };
+        Animator.prototype.done = function (cb) {
+            if (cb) {
+                if (!this._doneCbs) {
+                    this._doneCbs = [];
+                }
+                this._doneCbs.push(cb);
+            }
+            return this;
+        };
+        Animator.prototype.aborted = function (cb) {
+            if (cb) {
+                if (!this._abortedCbs) {
+                    this._abortedCbs = [];
+                }
+                this._abortedCbs.push(cb);
+            }
+            return this;
+        };
+        Animator.prototype.getClip = function () {
+            return this._clip;
+        };
+        Animator.prototype.getTrack = function (propName) {
+            return this._tracks[propName];
+        };
+        Animator.prototype.getTracks = function () {
+            var _this = this;
+            return map(this._trackKeys, function (key) { return _this._tracks[key]; });
+        };
+        Animator.prototype.stopTracks = function (propNames, forwardToLast) {
+            if (!propNames.length || !this._clip) {
+                return true;
+            }
+            var tracks = this._tracks;
+            var tracksKeys = this._trackKeys;
+            for (var i = 0; i < propNames.length; i++) {
+                var track = tracks[propNames[i]];
+                if (track && !track.isFinished()) {
+                    if (forwardToLast) {
+                        track.step(this._target, 1);
+                    }
+                    else if (this._started === 1) {
+                        track.step(this._target, 0);
+                    }
+                    track.setFinished();
+                }
+            }
+            var allAborted = true;
+            for (var i = 0; i < tracksKeys.length; i++) {
+                if (!tracks[tracksKeys[i]].isFinished()) {
+                    allAborted = false;
+                    break;
+                }
+            }
+            if (allAborted) {
+                this._abortedCallback();
+            }
+            return allAborted;
+        };
+        Animator.prototype.saveTo = function (target, trackKeys, firstOrLast) {
+            if (!target) {
+                return;
+            }
+            trackKeys = trackKeys || this._trackKeys;
+            for (var i = 0; i < trackKeys.length; i++) {
+                var propName = trackKeys[i];
+                var track = this._tracks[propName];
+                if (!track || track.isFinished()) {
+                    continue;
+                }
+                var kfs = track.keyframes;
+                var kf = kfs[firstOrLast ? 0 : kfs.length - 1];
+                if (kf) {
+                    target[propName] = cloneValue(kf.rawValue);
+                }
+            }
+        };
+        Animator.prototype.__changeFinalValue = function (finalProps, trackKeys) {
+            trackKeys = trackKeys || keys(finalProps);
+            for (var i = 0; i < trackKeys.length; i++) {
+                var propName = trackKeys[i];
+                var track = this._tracks[propName];
+                if (!track) {
+                    continue;
+                }
+                var kfs = track.keyframes;
+                if (kfs.length > 1) {
+                    var lastKf = kfs.pop();
+                    track.addKeyframe(lastKf.time, finalProps[propName]);
+                    track.prepare(this._maxTime, track.getAdditiveTrack());
+                }
+            }
+        };
+        return Animator;
+    }());
+
+    var Point = (function () {
+        function Point(x, y) {
+            this.x = x || 0;
+            this.y = y || 0;
+        }
+        Point.prototype.copy = function (other) {
+            this.x = other.x;
+            this.y = other.y;
+            return this;
+        };
+        Point.prototype.clone = function () {
+            return new Point(this.x, this.y);
+        };
+        Point.prototype.set = function (x, y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        };
+        Point.prototype.equal = function (other) {
+            return other.x === this.x && other.y === this.y;
+        };
+        Point.prototype.add = function (other) {
+            this.x += other.x;
+            this.y += other.y;
+            return this;
+        };
+        Point.prototype.scale = function (scalar) {
+            this.x *= scalar;
+            this.y *= scalar;
+        };
+        Point.prototype.scaleAndAdd = function (other, scalar) {
+            this.x += other.x * scalar;
+            this.y += other.y * scalar;
+        };
+        Point.prototype.sub = function (other) {
+            this.x -= other.x;
+            this.y -= other.y;
+            return this;
+        };
+        Point.prototype.dot = function (other) {
+            return this.x * other.x + this.y * other.y;
+        };
+        Point.prototype.len = function () {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+        };
+        Point.prototype.lenSquare = function () {
+            return this.x * this.x + this.y * this.y;
+        };
+        Point.prototype.normalize = function () {
+            var len = this.len();
+            this.x /= len;
+            this.y /= len;
+            return this;
+        };
+        Point.prototype.distance = function (other) {
+            var dx = this.x - other.x;
+            var dy = this.y - other.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+        Point.prototype.distanceSquare = function (other) {
+            var dx = this.x - other.x;
+            var dy = this.y - other.y;
+            return dx * dx + dy * dy;
+        };
+        Point.prototype.negate = function () {
+            this.x = -this.x;
+            this.y = -this.y;
+            return this;
+        };
+        Point.prototype.transform = function (m) {
+            if (!m) {
+                return;
+            }
+            var x = this.x;
+            var y = this.y;
+            this.x = m[0] * x + m[2] * y + m[4];
+            this.y = m[1] * x + m[3] * y + m[5];
+            return this;
+        };
+        Point.prototype.toArray = function (out) {
+            out[0] = this.x;
+            out[1] = this.y;
+            return out;
+        };
+        Point.prototype.fromArray = function (input) {
+            this.x = input[0];
+            this.y = input[1];
+        };
+        Point.set = function (p, x, y) {
+            p.x = x;
+            p.y = y;
+        };
+        Point.copy = function (p, p2) {
+            p.x = p2.x;
+            p.y = p2.y;
+        };
+        Point.len = function (p) {
+            return Math.sqrt(p.x * p.x + p.y * p.y);
+        };
+        Point.lenSquare = function (p) {
+            return p.x * p.x + p.y * p.y;
+        };
+        Point.dot = function (p0, p1) {
+            return p0.x * p1.x + p0.y * p1.y;
+        };
+        Point.add = function (out, p0, p1) {
+            out.x = p0.x + p1.x;
+            out.y = p0.y + p1.y;
+        };
+        Point.sub = function (out, p0, p1) {
+            out.x = p0.x - p1.x;
+            out.y = p0.y - p1.y;
+        };
+        Point.scale = function (out, p0, scalar) {
+            out.x = p0.x * scalar;
+            out.y = p0.y * scalar;
+        };
+        Point.scaleAndAdd = function (out, p0, p1, scalar) {
+            out.x = p0.x + p1.x * scalar;
+            out.y = p0.y + p1.y * scalar;
+        };
+        Point.lerp = function (out, p0, p1, t) {
+            var onet = 1 - t;
+            out.x = onet * p0.x + t * p1.x;
+            out.y = onet * p0.y + t * p1.y;
+        };
+        return Point;
+    }());
+
+    var mathMin = Math.min;
+    var mathMax = Math.max;
+    var lt = new Point();
+    var rb = new Point();
+    var lb = new Point();
+    var rt = new Point();
+    var minTv = new Point();
+    var maxTv = new Point();
+    var BoundingRect = (function () {
+        function BoundingRect(x, y, width, height) {
+            if (width < 0) {
+                x = x + width;
+                width = -width;
+            }
+            if (height < 0) {
+                y = y + height;
+                height = -height;
+            }
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+        BoundingRect.prototype.union = function (other) {
+            var x = mathMin(other.x, this.x);
+            var y = mathMin(other.y, this.y);
+            if (isFinite(this.x) && isFinite(this.width)) {
+                this.width = mathMax(other.x + other.width, this.x + this.width) - x;
+            }
+            else {
+                this.width = other.width;
+            }
+            if (isFinite(this.y) && isFinite(this.height)) {
+                this.height = mathMax(other.y + other.height, this.y + this.height) - y;
+            }
+            else {
+                this.height = other.height;
+            }
+            this.x = x;
+            this.y = y;
+        };
+        BoundingRect.prototype.applyTransform = function (m) {
+            BoundingRect.applyTransform(this, this, m);
+        };
+        BoundingRect.prototype.calculateTransform = function (b) {
+            var a = this;
+            var sx = b.width / a.width;
+            var sy = b.height / a.height;
+            var m = create();
+            translate(m, m, [-a.x, -a.y]);
+            scale(m, m, [sx, sy]);
+            translate(m, m, [b.x, b.y]);
+            return m;
+        };
+        BoundingRect.prototype.intersect = function (b, mtv) {
+            if (!b) {
+                return false;
+            }
+            if (!(b instanceof BoundingRect)) {
+                b = BoundingRect.create(b);
+            }
+            var a = this;
+            var ax0 = a.x;
+            var ax1 = a.x + a.width;
+            var ay0 = a.y;
+            var ay1 = a.y + a.height;
+            var bx0 = b.x;
+            var bx1 = b.x + b.width;
+            var by0 = b.y;
+            var by1 = b.y + b.height;
+            var overlap = !(ax1 < bx0 || bx1 < ax0 || ay1 < by0 || by1 < ay0);
+            if (mtv) {
+                var dMin = Infinity;
+                var dMax = 0;
+                var d0 = Math.abs(ax1 - bx0);
+                var d1 = Math.abs(bx1 - ax0);
+                var d2 = Math.abs(ay1 - by0);
+                var d3 = Math.abs(by1 - ay0);
+                var dx = Math.min(d0, d1);
+                var dy = Math.min(d2, d3);
+                if (ax1 < bx0 || bx1 < ax0) {
+                    if (dx > dMax) {
+                        dMax = dx;
+                        if (d0 < d1) {
+                            Point.set(maxTv, -d0, 0);
+                        }
+                        else {
+                            Point.set(maxTv, d1, 0);
+                        }
+                    }
+                }
+                else {
+                    if (dx < dMin) {
+                        dMin = dx;
+                        if (d0 < d1) {
+                            Point.set(minTv, d0, 0);
+                        }
+                        else {
+                            Point.set(minTv, -d1, 0);
+                        }
+                    }
+                }
+                if (ay1 < by0 || by1 < ay0) {
+                    if (dy > dMax) {
+                        dMax = dy;
+                        if (d2 < d3) {
+                            Point.set(maxTv, 0, -d2);
+                        }
+                        else {
+                            Point.set(maxTv, 0, d3);
+                        }
+                    }
+                }
+                else {
+                    if (dx < dMin) {
+                        dMin = dx;
+                        if (d2 < d3) {
+                            Point.set(minTv, 0, d2);
+                        }
+                        else {
+                            Point.set(minTv, 0, -d3);
+                        }
+                    }
+                }
+            }
+            if (mtv) {
+                Point.copy(mtv, overlap ? minTv : maxTv);
+            }
+            return overlap;
+        };
+        BoundingRect.prototype.contain = function (x, y) {
+            var rect = this;
+            return x >= rect.x
+                && x <= (rect.x + rect.width)
+                && y >= rect.y
+                && y <= (rect.y + rect.height);
+        };
+        BoundingRect.prototype.clone = function () {
+            return new BoundingRect(this.x, this.y, this.width, this.height);
+        };
+        BoundingRect.prototype.copy = function (other) {
+            BoundingRect.copy(this, other);
+        };
+        BoundingRect.prototype.plain = function () {
+            return {
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height
+            };
+        };
+        BoundingRect.prototype.isFinite = function () {
+            return isFinite(this.x)
+                && isFinite(this.y)
+                && isFinite(this.width)
+                && isFinite(this.height);
+        };
+        BoundingRect.prototype.isZero = function () {
+            return this.width === 0 || this.height === 0;
+        };
+        BoundingRect.create = function (rect) {
+            return new BoundingRect(rect.x, rect.y, rect.width, rect.height);
+        };
+        BoundingRect.copy = function (target, source) {
+            target.x = source.x;
+            target.y = source.y;
+            target.width = source.width;
+            target.height = source.height;
+        };
+        BoundingRect.applyTransform = function (target, source, m) {
+            if (!m) {
+                if (target !== source) {
+                    BoundingRect.copy(target, source);
+                }
+                return;
+            }
+            if (m[1] < 1e-5 && m[1] > -1e-5 && m[2] < 1e-5 && m[2] > -1e-5) {
+                var sx = m[0];
+                var sy = m[3];
+                var tx = m[4];
+                var ty = m[5];
+                target.x = source.x * sx + tx;
+                target.y = source.y * sy + ty;
+                target.width = source.width * sx;
+                target.height = source.height * sy;
+                if (target.width < 0) {
+                    target.x += target.width;
+                    target.width = -target.width;
+                }
+                if (target.height < 0) {
+                    target.y += target.height;
+                    target.height = -target.height;
+                }
+                return;
+            }
+            lt.x = lb.x = source.x;
+            lt.y = rt.y = source.y;
+            rb.x = rt.x = source.x + source.width;
+            rb.y = lb.y = source.y + source.height;
+            lt.transform(m);
+            rt.transform(m);
+            rb.transform(m);
+            lb.transform(m);
+            target.x = mathMin(lt.x, rb.x, lb.x, rt.x);
+            target.y = mathMin(lt.y, rb.y, lb.y, rt.y);
+            var maxX = mathMax(lt.x, rb.x, lb.x, rt.x);
+            var maxY = mathMax(lt.y, rb.y, lb.y, rt.y);
+            target.width = maxX - target.x;
+            target.height = maxY - target.y;
+        };
+        return BoundingRect;
+    }());
+
+    var Eventful = (function () {
+        function Eventful(eventProcessors) {
+            if (eventProcessors) {
+                this._$eventProcessor = eventProcessors;
+            }
+        }
+        Eventful.prototype.on = function (event, query, handler, context) {
+            if (!this._$handlers) {
+                this._$handlers = {};
+            }
+            var _h = this._$handlers;
+            if (typeof query === 'function') {
+                context = handler;
+                handler = query;
+                query = null;
+            }
+            if (!handler || !event) {
+                return this;
+            }
+            var eventProcessor = this._$eventProcessor;
+            if (query != null && eventProcessor && eventProcessor.normalizeQuery) {
+                query = eventProcessor.normalizeQuery(query);
+            }
+            if (!_h[event]) {
+                _h[event] = [];
+            }
+            for (var i = 0; i < _h[event].length; i++) {
+                if (_h[event][i].h === handler) {
+                    return this;
+                }
+            }
+            var wrap = {
+                h: handler,
+                query: query,
+                ctx: (context || this),
+                callAtLast: handler.zrEventfulCallAtLast
+            };
+            var lastIndex = _h[event].length - 1;
+            var lastWrap = _h[event][lastIndex];
+            (lastWrap && lastWrap.callAtLast)
+                ? _h[event].splice(lastIndex, 0, wrap)
+                : _h[event].push(wrap);
+            return this;
+        };
+        Eventful.prototype.isSilent = function (eventName) {
+            var _h = this._$handlers;
+            return !_h || !_h[eventName] || !_h[eventName].length;
+        };
+        Eventful.prototype.off = function (eventType, handler) {
+            var _h = this._$handlers;
+            if (!_h) {
+                return this;
+            }
+            if (!eventType) {
+                this._$handlers = {};
+                return this;
+            }
+            if (handler) {
+                if (_h[eventType]) {
+                    var newList = [];
+                    for (var i = 0, l = _h[eventType].length; i < l; i++) {
+                        if (_h[eventType][i].h !== handler) {
+                            newList.push(_h[eventType][i]);
+                        }
+                    }
+                    _h[eventType] = newList;
+                }
+                if (_h[eventType] && _h[eventType].length === 0) {
+                    delete _h[eventType];
+                }
+            }
+            else {
+                delete _h[eventType];
+            }
+            return this;
+        };
+        Eventful.prototype.trigger = function (eventType) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (!this._$handlers) {
+                return this;
+            }
+            var _h = this._$handlers[eventType];
+            var eventProcessor = this._$eventProcessor;
+            if (_h) {
+                var argLen = args.length;
+                var len = _h.length;
+                for (var i = 0; i < len; i++) {
+                    var hItem = _h[i];
+                    if (eventProcessor
+                        && eventProcessor.filter
+                        && hItem.query != null
+                        && !eventProcessor.filter(eventType, hItem.query)) {
+                        continue;
+                    }
+                    switch (argLen) {
+                        case 0:
+                            hItem.h.call(hItem.ctx);
+                            break;
+                        case 1:
+                            hItem.h.call(hItem.ctx, args[0]);
+                            break;
+                        case 2:
+                            hItem.h.call(hItem.ctx, args[0], args[1]);
+                            break;
+                        default:
+                            hItem.h.apply(hItem.ctx, args);
+                            break;
+                    }
+                }
+            }
+            eventProcessor && eventProcessor.afterTrigger
+                && eventProcessor.afterTrigger(eventType);
+            return this;
+        };
+        Eventful.prototype.triggerWithContext = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (!this._$handlers) {
+                return this;
+            }
+            var _h = this._$handlers[type];
+            var eventProcessor = this._$eventProcessor;
+            if (_h) {
+                var argLen = args.length;
+                var ctx = args[argLen - 1];
+                var len = _h.length;
+                for (var i = 0; i < len; i++) {
+                    var hItem = _h[i];
+                    if (eventProcessor
+                        && eventProcessor.filter
+                        && hItem.query != null
+                        && !eventProcessor.filter(type, hItem.query)) {
+                        continue;
+                    }
+                    switch (argLen) {
+                        case 0:
+                            hItem.h.call(ctx);
+                            break;
+                        case 1:
+                            hItem.h.call(ctx, args[0]);
+                            break;
+                        case 2:
+                            hItem.h.call(ctx, args[0], args[1]);
+                            break;
+                        default:
+                            hItem.h.apply(ctx, args.slice(1, argLen - 1));
+                            break;
+                    }
+                }
+            }
+            eventProcessor && eventProcessor.afterTrigger
+                && eventProcessor.afterTrigger(type);
+            return this;
+        };
+        return Eventful;
+    }());
+
+    var textWidthCache = {};
+    function getWidth(text, font) {
+        font = font || DEFAULT_FONT;
+        var cacheOfFont = textWidthCache[font];
+        if (!cacheOfFont) {
+            cacheOfFont = textWidthCache[font] = new LRU(500);
+        }
+        var width = cacheOfFont.get(text);
+        if (width == null) {
+            width = platformApi.measureText(text, font).width;
+            cacheOfFont.put(text, width);
+        }
+        return width;
+    }
+    function innerGetBoundingRect(text, font, textAlign, textBaseline) {
+        var width = getWidth(text, font);
+        var height = getLineHeight(font);
+        var x = adjustTextX(0, width, textAlign);
+        var y = adjustTextY$1(0, height, textBaseline);
+        var rect = new BoundingRect(x, y, width, height);
+        return rect;
+    }
+    function getBoundingRect(text, font, textAlign, textBaseline) {
+        var textLines = ((text || '') + '').split('\n');
+        var len = textLines.length;
+        if (len === 1) {
+            return innerGetBoundingRect(textLines[0], font, textAlign, textBaseline);
+        }
+        else {
+            var uniondRect = new BoundingRect(0, 0, 0, 0);
+            for (var i = 0; i < textLines.length; i++) {
+                var rect = innerGetBoundingRect(textLines[i], font, textAlign, textBaseline);
+                i === 0 ? uniondRect.copy(rect) : uniondRect.union(rect);
+            }
+            return uniondRect;
+        }
+    }
+    function adjustTextX(x, width, textAlign) {
+        if (textAlign === 'right') {
+            x -= width;
+        }
+        else if (textAlign === 'center') {
+            x -= width / 2;
+        }
+        return x;
+    }
+    function adjustTextY$1(y, height, verticalAlign) {
+        if (verticalAlign === 'middle') {
+            y -= height / 2;
+        }
+        else if (verticalAlign === 'bottom') {
+            y -= height;
+        }
+        return y;
+    }
+    function getLineHeight(font) {
+        return getWidth('国', font);
+    }
+    function parsePercent(value, maxValue) {
+        if (typeof value === 'string') {
+            if (value.lastIndexOf('%') >= 0) {
+                return parseFloat(value) / 100 * maxValue;
+            }
+            return parseFloat(value);
+        }
+        return value;
+    }
+    function calculateTextPosition(out, opts, rect) {
+        var textPosition = opts.position || 'inside';
+        var distance = opts.distance != null ? opts.distance : 5;
+        var height = rect.height;
+        var width = rect.width;
+        var halfHeight = height / 2;
+        var x = rect.x;
+        var y = rect.y;
+        var textAlign = 'left';
+        var textVerticalAlign = 'top';
+        if (textPosition instanceof Array) {
+            x += parsePercent(textPosition[0], rect.width);
+            y += parsePercent(textPosition[1], rect.height);
+            textAlign = null;
+            textVerticalAlign = null;
+        }
+        else {
+            switch (textPosition) {
+                case 'left':
+                    x -= distance;
+                    y += halfHeight;
+                    textAlign = 'right';
+                    textVerticalAlign = 'middle';
+                    break;
+                case 'right':
+                    x += distance + width;
+                    y += halfHeight;
+                    textVerticalAlign = 'middle';
+                    break;
+                case 'top':
+                    x += width / 2;
+                    y -= distance;
+                    textAlign = 'center';
+                    textVerticalAlign = 'bottom';
+                    break;
+                case 'bottom':
+                    x += width / 2;
+                    y += height + distance;
+                    textAlign = 'center';
+                    break;
+                case 'inside':
+                    x += width / 2;
+                    y += halfHeight;
+                    textAlign = 'center';
+                    textVerticalAlign = 'middle';
+                    break;
+                case 'insideLeft':
+                    x += distance;
+                    y += halfHeight;
+                    textVerticalAlign = 'middle';
+                    break;
+                case 'insideRight':
+                    x += width - distance;
+                    y += halfHeight;
+                    textAlign = 'right';
+                    textVerticalAlign = 'middle';
+                    break;
+                case 'insideTop':
+                    x += width / 2;
+                    y += distance;
+                    textAlign = 'center';
+                    break;
+                case 'insideBottom':
+                    x += width / 2;
+                    y += height - distance;
+                    textAlign = 'center';
+                    textVerticalAlign = 'bottom';
+                    break;
+                case 'insideTopLeft':
+                    x += distance;
+                    y += distance;
+                    break;
+                case 'insideTopRight':
+                    x += width - distance;
+                    y += distance;
+                    textAlign = 'right';
+                    break;
+                case 'insideBottomLeft':
+                    x += distance;
+                    y += height - distance;
+                    textVerticalAlign = 'bottom';
+                    break;
+                case 'insideBottomRight':
+                    x += width - distance;
+                    y += height - distance;
+                    textAlign = 'right';
+                    textVerticalAlign = 'bottom';
+                    break;
+            }
+        }
+        out = out || {};
+        out.x = x;
+        out.y = y;
+        out.align = textAlign;
+        out.verticalAlign = textVerticalAlign;
+        return out;
+    }
+
+    var dpr = 1;
+    if (env.hasGlobalWindow) {
+        dpr = Math.max(window.devicePixelRatio
+            || (window.screen && window.screen.deviceXDPI / window.screen.logicalXDPI)
+            || 1, 1);
+    }
+    var devicePixelRatio = dpr;
+    var DARK_MODE_THRESHOLD = 0.4;
+    var DARK_LABEL_COLOR = '#333';
+    var LIGHT_LABEL_COLOR = '#ccc';
+    var LIGHTER_LABEL_COLOR = '#eee';
+
+    var REDRAW_BIT = 1;
+    var STYLE_CHANGED_BIT = 2;
+    var SHAPE_CHANGED_BIT = 4;
+
+    var PRESERVED_NORMAL_STATE = '__zr_normal__';
+    var PRIMARY_STATES_KEYS = TRANSFORMABLE_PROPS.concat(['ignore']);
+    var DEFAULT_ANIMATABLE_MAP = reduce(TRANSFORMABLE_PROPS, function (obj, key) {
+        obj[key] = true;
+        return obj;
+    }, { ignore: false });
+    var tmpTextPosCalcRes = {};
+    var tmpBoundingRect = new BoundingRect(0, 0, 0, 0);
+    var Element = (function () {
+        function Element(props) {
+            this.id = guid();
+            this.animators = [];
+            this.currentStates = [];
+            this.states = {};
+            this._init(props);
+        }
+        Element.prototype._init = function (props) {
+            this.attr(props);
+        };
+        Element.prototype.drift = function (dx, dy, e) {
+            switch (this.draggable) {
+                case 'horizontal':
+                    dy = 0;
+                    break;
+                case 'vertical':
+                    dx = 0;
+                    break;
+            }
+            var m = this.transform;
+            if (!m) {
+                m = this.transform = [1, 0, 0, 1, 0, 0];
+            }
+            m[4] += dx;
+            m[5] += dy;
+            this.decomposeTransform();
+            this.markRedraw();
+        };
+        Element.prototype.beforeUpdate = function () { };
+        Element.prototype.afterUpdate = function () { };
+        Element.prototype.update = function () {
+            this.updateTransform();
+            if (this.__dirty) {
+                this.updateInnerText();
+            }
+        };
+        Element.prototype.updateInnerText = function (forceUpdate) {
+            var textEl = this._textContent;
+            if (textEl && (!textEl.ignore || forceUpdate)) {
+                if (!this.textConfig) {
+                    this.textConfig = {};
+                }
+                var textConfig = this.textConfig;
+                var isLocal = textConfig.local;
+                var innerTransformable = textEl.innerTransformable;
+                var textAlign = void 0;
+                var textVerticalAlign = void 0;
+                var textStyleChanged = false;
+                innerTransformable.parent = isLocal ? this : null;
+                var innerOrigin = false;
+                innerTransformable.copyTransform(textEl);
+                if (textConfig.position != null) {
+                    var layoutRect = tmpBoundingRect;
+                    if (textConfig.layoutRect) {
+                        layoutRect.copy(textConfig.layoutRect);
+                    }
+                    else {
+                        layoutRect.copy(this.getBoundingRect());
+                    }
+                    if (!isLocal) {
+                        layoutRect.applyTransform(this.transform);
+                    }
+                    if (this.calculateTextPosition) {
+                        this.calculateTextPosition(tmpTextPosCalcRes, textConfig, layoutRect);
+                    }
+                    else {
+                        calculateTextPosition(tmpTextPosCalcRes, textConfig, layoutRect);
+                    }
+                    innerTransformable.x = tmpTextPosCalcRes.x;
+                    innerTransformable.y = tmpTextPosCalcRes.y;
+                    textAlign = tmpTextPosCalcRes.align;
+                    textVerticalAlign = tmpTextPosCalcRes.verticalAlign;
+                    var textOrigin = textConfig.origin;
+                    if (textOrigin && textConfig.rotation != null) {
+                        var relOriginX = void 0;
+                        var relOriginY = void 0;
+                        if (textOrigin === 'center') {
+                            relOriginX = layoutRect.width * 0.5;
+                            relOriginY = layoutRect.height * 0.5;
+                        }
+                        else {
+                            relOriginX = parsePercent(textOrigin[0], layoutRect.width);
+                            relOriginY = parsePercent(textOrigin[1], layoutRect.height);
+                        }
+                        innerOrigin = true;
+                        innerTransformable.originX = -innerTransformable.x + relOriginX + (isLocal ? 0 : layoutRect.x);
+                        innerTransformable.originY = -innerTransformable.y + relOriginY + (isLocal ? 0 : layoutRect.y);
+                    }
+                }
+                if (textConfig.rotation != null) {
+                    innerTransformable.rotation = textConfig.rotation;
+                }
+                var textOffset = textConfig.offset;
+                if (textOffset) {
+                    innerTransformable.x += textOffset[0];
+                    innerTransformable.y += textOffset[1];
+                    if (!innerOrigin) {
+                        innerTransformable.originX = -textOffset[0];
+                        innerTransformable.originY = -textOffset[1];
+                    }
+                }
+                var isInside = textConfig.inside == null
+                    ? (typeof textConfig.position === 'string' && textConfig.position.indexOf('inside') >= 0)
+                    : textConfig.inside;
+                var innerTextDefaultStyle = this._innerTextDefaultStyle || (this._innerTextDefaultStyle = {});
+                var textFill = void 0;
+                var textStroke = void 0;
+                var autoStroke = void 0;
+                if (isInside && this.canBeInsideText()) {
+                    textFill = textConfig.insideFill;
+                    textStroke = textConfig.insideStroke;
+                    if (textFill == null || textFill === 'auto') {
+                        textFill = this.getInsideTextFill();
+                    }
+                    if (textStroke == null || textStroke === 'auto') {
+                        textStroke = this.getInsideTextStroke(textFill);
+                        autoStroke = true;
+                    }
+                }
+                else {
+                    textFill = textConfig.outsideFill;
+                    textStroke = textConfig.outsideStroke;
+                    if (textFill == null || textFill === 'auto') {
+                        textFill = this.getOutsideFill();
+                    }
+                    if (textStroke == null || textStroke === 'auto') {
+                        textStroke = this.getOutsideStroke(textFill);
+                        autoStroke = true;
+                    }
+                }
+                textFill = textFill || '#000';
+                if (textFill !== innerTextDefaultStyle.fill
+                    || textStroke !== innerTextDefaultStyle.stroke
+                    || autoStroke !== innerTextDefaultStyle.autoStroke
+                    || textAlign !== innerTextDefaultStyle.align
+                    || textVerticalAlign !== innerTextDefaultStyle.verticalAlign) {
+                    textStyleChanged = true;
+                    innerTextDefaultStyle.fill = textFill;
+                    innerTextDefaultStyle.stroke = textStroke;
+                    innerTextDefaultStyle.autoStroke = autoStroke;
+                    innerTextDefaultStyle.align = textAlign;
+                    innerTextDefaultStyle.verticalAlign = textVerticalAlign;
+                    textEl.setDefaultTextStyle(innerTextDefaultStyle);
+                }
+                textEl.__dirty |= REDRAW_BIT;
+                if (textStyleChanged) {
+                    textEl.dirtyStyle(true);
+                }
+            }
+        };
+        Element.prototype.canBeInsideText = function () {
+            return true;
+        };
+        Element.prototype.getInsideTextFill = function () {
+            return '#fff';
+        };
+        Element.prototype.getInsideTextStroke = function (textFill) {
+            return '#000';
+        };
+        Element.prototype.getOutsideFill = function () {
+            return this.__zr && this.__zr.isDarkMode() ? LIGHT_LABEL_COLOR : DARK_LABEL_COLOR;
+        };
+        Element.prototype.getOutsideStroke = function (textFill) {
+            var backgroundColor = this.__zr && this.__zr.getBackgroundColor();
+            var colorArr = typeof backgroundColor === 'string' && parse(backgroundColor);
+            if (!colorArr) {
+                colorArr = [255, 255, 255, 1];
+            }
+            var alpha = colorArr[3];
+            var isDark = this.__zr.isDarkMode();
+            for (var i = 0; i < 3; i++) {
+                colorArr[i] = colorArr[i] * alpha + (isDark ? 0 : 255) * (1 - alpha);
+            }
+            colorArr[3] = 1;
+            return stringify(colorArr, 'rgba');
+        };
+        Element.prototype.traverse = function (cb, context) { };
+        Element.prototype.attrKV = function (key, value) {
+            if (key === 'textConfig') {
+                this.setTextConfig(value);
+            }
+            else if (key === 'textContent') {
+                this.setTextContent(value);
+            }
+            else if (key === 'clipPath') {
+                this.setClipPath(value);
+            }
+            else if (key === 'extra') {
+                this.extra = this.extra || {};
+                extend(this.extra, value);
+            }
+            else {
+                this[key] = value;
+            }
+        };
+        Element.prototype.hide = function () {
+            this.ignore = true;
+            this.markRedraw();
+        };
+        Element.prototype.show = function () {
+            this.ignore = false;
+            this.markRedraw();
+        };
+        Element.prototype.attr = function (keyOrObj, value) {
+            if (typeof keyOrObj === 'string') {
+                this.attrKV(keyOrObj, value);
+            }
+            else if (isObject(keyOrObj)) {
+                var obj = keyOrObj;
+                var keysArr = keys(obj);
+                for (var i = 0; i < keysArr.length; i++) {
+                    var key = keysArr[i];
+                    this.attrKV(key, keyOrObj[key]);
+                }
+            }
+            this.markRedraw();
+            return this;
+        };
+        Element.prototype.saveCurrentToNormalState = function (toState) {
+            this._innerSaveToNormal(toState);
+            var normalState = this._normalState;
+            for (var i = 0; i < this.animators.length; i++) {
+                var animator = this.animators[i];
+                var fromStateTransition = animator.__fromStateTransition;
+                if (animator.getLoop() || fromStateTransition && fromStateTransition !== PRESERVED_NORMAL_STATE) {
+                    continue;
+                }
+                var targetName = animator.targetName;
+                var target = targetName
+                    ? normalState[targetName] : normalState;
+                animator.saveTo(target);
+            }
+        };
+        Element.prototype._innerSaveToNormal = function (toState) {
+            var normalState = this._normalState;
+            if (!normalState) {
+                normalState = this._normalState = {};
+            }
+            if (toState.textConfig && !normalState.textConfig) {
+                normalState.textConfig = this.textConfig;
+            }
+            this._savePrimaryToNormal(toState, normalState, PRIMARY_STATES_KEYS);
+        };
+        Element.prototype._savePrimaryToNormal = function (toState, normalState, primaryKeys) {
+            for (var i = 0; i < primaryKeys.length; i++) {
+                var key = primaryKeys[i];
+                if (toState[key] != null && !(key in normalState)) {
+                    normalState[key] = this[key];
+                }
+            }
+        };
+        Element.prototype.hasState = function () {
+            return this.currentStates.length > 0;
+        };
+        Element.prototype.getState = function (name) {
+            return this.states[name];
+        };
+        Element.prototype.ensureState = function (name) {
+            var states = this.states;
+            if (!states[name]) {
+                states[name] = {};
+            }
+            return states[name];
+        };
+        Element.prototype.clearStates = function (noAnimation) {
+            this.useState(PRESERVED_NORMAL_STATE, false, noAnimation);
+        };
+        Element.prototype.useState = function (stateName, keepCurrentStates, noAnimation, forceUseHoverLayer) {
+            var toNormalState = stateName === PRESERVED_NORMAL_STATE;
+            var hasStates = this.hasState();
+            if (!hasStates && toNormalState) {
+                return;
+            }
+            var currentStates = this.currentStates;
+            var animationCfg = this.stateTransition;
+            if (indexOf(currentStates, stateName) >= 0 && (keepCurrentStates || currentStates.length === 1)) {
+                return;
+            }
+            var state;
+            if (this.stateProxy && !toNormalState) {
+                state = this.stateProxy(stateName);
+            }
+            if (!state) {
+                state = (this.states && this.states[stateName]);
+            }
+            if (!state && !toNormalState) {
+                logError("State ".concat(stateName, " not exists."));
+                return;
+            }
+            if (!toNormalState) {
+                this.saveCurrentToNormalState(state);
+            }
+            var useHoverLayer = !!((state && state.hoverLayer) || forceUseHoverLayer);
+            if (useHoverLayer) {
+                this._toggleHoverLayerFlag(true);
+            }
+            this._applyStateObj(stateName, state, this._normalState, keepCurrentStates, !noAnimation && !this.__inHover && animationCfg && animationCfg.duration > 0, animationCfg);
+            var textContent = this._textContent;
+            var textGuide = this._textGuide;
+            if (textContent) {
+                textContent.useState(stateName, keepCurrentStates, noAnimation, useHoverLayer);
+            }
+            if (textGuide) {
+                textGuide.useState(stateName, keepCurrentStates, noAnimation, useHoverLayer);
+            }
+            if (toNormalState) {
+                this.currentStates = [];
+                this._normalState = {};
+            }
+            else {
+                if (!keepCurrentStates) {
+                    this.currentStates = [stateName];
+                }
+                else {
+                    this.currentStates.push(stateName);
+                }
+            }
+            this._updateAnimationTargets();
+            this.markRedraw();
+            if (!useHoverLayer && this.__inHover) {
+                this._toggleHoverLayerFlag(false);
+                this.__dirty &= ~REDRAW_BIT;
+            }
+            return state;
+        };
+        Element.prototype.useStates = function (states, noAnimation, forceUseHoverLayer) {
+            if (!states.length) {
+                this.clearStates();
+            }
+            else {
+                var stateObjects = [];
+                var currentStates = this.currentStates;
+                var len = states.length;
+                var notChange = len === currentStates.length;
+                if (notChange) {
+                    for (var i = 0; i < len; i++) {
+                        if (states[i] !== currentStates[i]) {
+                            notChange = false;
+                            break;
+                        }
+                    }
+                }
+                if (notChange) {
+                    return;
+                }
+                for (var i = 0; i < len; i++) {
+                    var stateName = states[i];
+                    var stateObj = void 0;
+                    if (this.stateProxy) {
+                        stateObj = this.stateProxy(stateName, states);
+                    }
+                    if (!stateObj) {
+                        stateObj = this.states[stateName];
+                    }
+                    if (stateObj) {
+                        stateObjects.push(stateObj);
+                    }
+                }
+                var lastStateObj = stateObjects[len - 1];
+                var useHoverLayer = !!((lastStateObj && lastStateObj.hoverLayer) || forceUseHoverLayer);
+                if (useHoverLayer) {
+                    this._toggleHoverLayerFlag(true);
+                }
+                var mergedState = this._mergeStates(stateObjects);
+                var animationCfg = this.stateTransition;
+                this.saveCurrentToNormalState(mergedState);
+                this._applyStateObj(states.join(','), mergedState, this._normalState, false, !noAnimation && !this.__inHover && animationCfg && animationCfg.duration > 0, animationCfg);
+                var textContent = this._textContent;
+                var textGuide = this._textGuide;
+                if (textContent) {
+                    textContent.useStates(states, noAnimation, useHoverLayer);
+                }
+                if (textGuide) {
+                    textGuide.useStates(states, noAnimation, useHoverLayer);
+                }
+                this._updateAnimationTargets();
+                this.currentStates = states.slice();
+                this.markRedraw();
+                if (!useHoverLayer && this.__inHover) {
+                    this._toggleHoverLayerFlag(false);
+                    this.__dirty &= ~REDRAW_BIT;
+                }
+            }
+        };
+        Element.prototype.isSilent = function () {
+            var isSilent = this.silent;
+            var ancestor = this.parent;
+            while (!isSilent && ancestor) {
+                if (ancestor.silent) {
+                    isSilent = true;
+                    break;
+                }
+                ancestor = ancestor.parent;
+            }
+            return isSilent;
+        };
+        Element.prototype._updateAnimationTargets = function () {
+            for (var i = 0; i < this.animators.length; i++) {
+                var animator = this.animators[i];
+                if (animator.targetName) {
+                    animator.changeTarget(this[animator.targetName]);
+                }
+            }
+        };
+        Element.prototype.removeState = function (state) {
+            var idx = indexOf(this.currentStates, state);
+            if (idx >= 0) {
+                var currentStates = this.currentStates.slice();
+                currentStates.splice(idx, 1);
+                this.useStates(currentStates);
+            }
+        };
+        Element.prototype.replaceState = function (oldState, newState, forceAdd) {
+            var currentStates = this.currentStates.slice();
+            var idx = indexOf(currentStates, oldState);
+            var newStateExists = indexOf(currentStates, newState) >= 0;
+            if (idx >= 0) {
+                if (!newStateExists) {
+                    currentStates[idx] = newState;
+                }
+                else {
+                    currentStates.splice(idx, 1);
+                }
+            }
+            else if (forceAdd && !newStateExists) {
+                currentStates.push(newState);
+            }
+            this.useStates(currentStates);
+        };
+        Element.prototype.toggleState = function (state, enable) {
+            if (enable) {
+                this.useState(state, true);
+            }
+            else {
+                this.removeState(state);
+            }
+        };
+        Element.prototype._mergeStates = function (states) {
+            var mergedState = {};
+            var mergedTextConfig;
+            for (var i = 0; i < states.length; i++) {
+                var state = states[i];
+                extend(mergedState, state);
+                if (state.textConfig) {
+                    mergedTextConfig = mergedTextConfig || {};
+                    extend(mergedTextConfig, state.textConfig);
+                }
+            }
+            if (mergedTextConfig) {
+                mergedState.textConfig = mergedTextConfig;
+            }
+            return mergedState;
+        };
+        Element.prototype._applyStateObj = function (stateName, state, normalState, keepCurrentStates, transition, animationCfg) {
+            var needsRestoreToNormal = !(state && keepCurrentStates);
+            if (state && state.textConfig) {
+                this.textConfig = extend({}, keepCurrentStates ? this.textConfig : normalState.textConfig);
+                extend(this.textConfig, state.textConfig);
+            }
+            else if (needsRestoreToNormal) {
+                if (normalState.textConfig) {
+                    this.textConfig = normalState.textConfig;
+                }
+            }
+            var transitionTarget = {};
+            var hasTransition = false;
+            for (var i = 0; i < PRIMARY_STATES_KEYS.length; i++) {
+                var key = PRIMARY_STATES_KEYS[i];
+                var propNeedsTransition = transition && DEFAULT_ANIMATABLE_MAP[key];
+                if (state && state[key] != null) {
+                    if (propNeedsTransition) {
+                        hasTransition = true;
+                        transitionTarget[key] = state[key];
+                    }
+                    else {
+                        this[key] = state[key];
+                    }
+                }
+                else if (needsRestoreToNormal) {
+                    if (normalState[key] != null) {
+                        if (propNeedsTransition) {
+                            hasTransition = true;
+                            transitionTarget[key] = normalState[key];
+                        }
+                        else {
+                            this[key] = normalState[key];
+                        }
+                    }
+                }
+            }
+            if (!transition) {
+                for (var i = 0; i < this.animators.length; i++) {
+                    var animator = this.animators[i];
+                    var targetName = animator.targetName;
+                    if (!animator.getLoop()) {
+                        animator.__changeFinalValue(targetName
+                            ? (state || normalState)[targetName]
+                            : (state || normalState));
+                    }
+                }
+            }
+            if (hasTransition) {
+                this._transitionState(stateName, transitionTarget, animationCfg);
+            }
+        };
+        Element.prototype._attachComponent = function (componentEl) {
+            if (componentEl.__zr && !componentEl.__hostTarget) {
+                {
+                    throw new Error('Text element has been added to zrender.');
+                }
+            }
+            if (componentEl === this) {
+                {
+                    throw new Error('Recursive component attachment.');
+                }
+            }
+            var zr = this.__zr;
+            if (zr) {
+                componentEl.addSelfToZr(zr);
+            }
+            componentEl.__zr = zr;
+            componentEl.__hostTarget = this;
+        };
+        Element.prototype._detachComponent = function (componentEl) {
+            if (componentEl.__zr) {
+                componentEl.removeSelfFromZr(componentEl.__zr);
+            }
+            componentEl.__zr = null;
+            componentEl.__hostTarget = null;
+        };
+        Element.prototype.getClipPath = function () {
+            return this._clipPath;
+        };
+        Element.prototype.setClipPath = function (clipPath) {
+            if (this._clipPath && this._clipPath !== clipPath) {
+                this.removeClipPath();
+            }
+            this._attachComponent(clipPath);
+            this._clipPath = clipPath;
+            this.markRedraw();
+        };
+        Element.prototype.removeClipPath = function () {
+            var clipPath = this._clipPath;
+            if (clipPath) {
+                this._detachComponent(clipPath);
+                this._clipPath = null;
+                this.markRedraw();
+            }
+        };
+        Element.prototype.getTextContent = function () {
+            return this._textContent;
+        };
+        Element.prototype.setTextContent = function (textEl) {
+            var previousTextContent = this._textContent;
+            if (previousTextContent === textEl) {
+                return;
+            }
+            if (previousTextContent && previousTextContent !== textEl) {
+                this.removeTextContent();
+            }
+            {
+                if (textEl.__zr && !textEl.__hostTarget) {
+                    throw new Error('Text element has been added to zrender.');
+                }
+            }
+            textEl.innerTransformable = new Transformable();
+            this._attachComponent(textEl);
+            this._textContent = textEl;
+            this.markRedraw();
+        };
+        Element.prototype.setTextConfig = function (cfg) {
+            if (!this.textConfig) {
+                this.textConfig = {};
+            }
+            extend(this.textConfig, cfg);
+            this.markRedraw();
+        };
+        Element.prototype.removeTextConfig = function () {
+            this.textConfig = null;
+            this.markRedraw();
+        };
+        Element.prototype.removeTextContent = function () {
+            var textEl = this._textContent;
+            if (textEl) {
+                textEl.innerTransformable = null;
+                this._detachComponent(textEl);
+                this._textContent = null;
+                this._innerTextDefaultStyle = null;
+                this.markRedraw();
+            }
+        };
+        Element.prototype.getTextGuideLine = function () {
+            return this._textGuide;
+        };
+        Element.prototype.setTextGuideLine = function (guideLine) {
+            if (this._textGuide && this._textGuide !== guideLine) {
+                this.removeTextGuideLine();
+            }
+            this._attachComponent(guideLine);
+            this._textGuide = guideLine;
+            this.markRedraw();
+        };
+        Element.prototype.removeTextGuideLine = function () {
+            var textGuide = this._textGuide;
+            if (textGuide) {
+                this._detachComponent(textGuide);
+                this._textGuide = null;
+                this.markRedraw();
+            }
+        };
+        Element.prototype.markRedraw = function () {
+            this.__dirty |= REDRAW_BIT;
+            var zr = this.__zr;
+            if (zr) {
+                if (this.__inHover) {
+                    zr.refreshHover();
+                }
+                else {
+                    zr.refresh();
+                }
+            }
+            if (this.__hostTarget) {
+                this.__hostTarget.markRedraw();
+            }
+        };
+        Element.prototype.dirty = function () {
+            this.markRedraw();
+        };
+        Element.prototype._toggleHoverLayerFlag = function (inHover) {
+            this.__inHover = inHover;
+            var textContent = this._textContent;
+            var textGuide = this._textGuide;
+            if (textContent) {
+                textContent.__inHover = inHover;
+            }
+            if (textGuide) {
+                textGuide.__inHover = inHover;
+            }
+        };
+        Element.prototype.addSelfToZr = function (zr) {
+            if (this.__zr === zr) {
+                return;
+            }
+            this.__zr = zr;
+            var animators = this.animators;
+            if (animators) {
+                for (var i = 0; i < animators.length; i++) {
+                    zr.animation.addAnimator(animators[i]);
+                }
+            }
+            if (this._clipPath) {
+                this._clipPath.addSelfToZr(zr);
+            }
+            if (this._textContent) {
+                this._textContent.addSelfToZr(zr);
+            }
+            if (this._textGuide) {
+                this._textGuide.addSelfToZr(zr);
+            }
+        };
+        Element.prototype.removeSelfFromZr = function (zr) {
+            if (!this.__zr) {
+                return;
+            }
+            this.__zr = null;
+            var animators = this.animators;
+            if (animators) {
+                for (var i = 0; i < animators.length; i++) {
+                    zr.animation.removeAnimator(animators[i]);
+                }
+            }
+            if (this._clipPath) {
+                this._clipPath.removeSelfFromZr(zr);
+            }
+            if (this._textContent) {
+                this._textContent.removeSelfFromZr(zr);
+            }
+            if (this._textGuide) {
+                this._textGuide.removeSelfFromZr(zr);
+            }
+        };
+        Element.prototype.animate = function (key, loop, allowDiscreteAnimation) {
+            var target = key ? this[key] : this;
+            {
+                if (!target) {
+                    logError('Property "'
+                        + key
+                        + '" is not existed in element '
+                        + this.id);
+                    return;
+                }
+            }
+            var animator = new Animator(target, loop, allowDiscreteAnimation);
+            key && (animator.targetName = key);
+            this.addAnimator(animator, key);
+            return animator;
+        };
+        Element.prototype.addAnimator = function (animator, key) {
+            var zr = this.__zr;
+            var el = this;
+            animator.during(function () {
+                el.updateDuringAnimation(key);
+            }).done(function () {
+                var animators = el.animators;
+                var idx = indexOf(animators, animator);
+                if (idx >= 0) {
+                    animators.splice(idx, 1);
+                }
+            });
+            this.animators.push(animator);
+            if (zr) {
+                zr.animation.addAnimator(animator);
+            }
+            zr && zr.wakeUp();
+        };
+        Element.prototype.updateDuringAnimation = function (key) {
+            this.markRedraw();
+        };
+        Element.prototype.stopAnimation = function (scope, forwardToLast) {
+            var animators = this.animators;
+            var len = animators.length;
+            var leftAnimators = [];
+            for (var i = 0; i < len; i++) {
+                var animator = animators[i];
+                if (!scope || scope === animator.scope) {
+                    animator.stop(forwardToLast);
+                }
+                else {
+                    leftAnimators.push(animator);
+                }
+            }
+            this.animators = leftAnimators;
+            return this;
+        };
+        Element.prototype.animateTo = function (target, cfg, animationProps) {
+            animateTo(this, target, cfg, animationProps);
+        };
+        Element.prototype.animateFrom = function (target, cfg, animationProps) {
+            animateTo(this, target, cfg, animationProps, true);
+        };
+        Element.prototype._transitionState = function (stateName, target, cfg, animationProps) {
+            var animators = animateTo(this, target, cfg, animationProps);
+            for (var i = 0; i < animators.length; i++) {
+                animators[i].__fromStateTransition = stateName;
+            }
+        };
+        Element.prototype.getParents = function () {
+            return getParents(this);
+        };
+        Element.prototype.getAbsolutePosition = function () {
+            var _a = this, x = _a.x, y = _a.y;
+            var parents = this.getParents();
+            parents.forEach(function (e) {
+                x += e.x;
+                y += e.y;
+            });
+            return { x: x, y: y };
+        };
+        Element.prototype.getAbsoluteBoundingRect = function () {
+            var boundingRect = this.getBoundingRect().plain();
+            boundingRect.x = this.x;
+            boundingRect.y = this.y;
+            var parents = this.getParents();
+            parents.forEach(function (e) {
+                boundingRect.x += e.x;
+                boundingRect.y += e.y;
+            });
+            return BoundingRect.create(boundingRect);
+        };
+        Element.prototype.getBoundingRect = function () {
+            return null;
+        };
+        Element.prototype.getPaintRect = function () {
+            return null;
+        };
+        Element.initDefaultProps = (function () {
+            var elProto = Element.prototype;
+            elProto.type = 'element';
+            elProto.name = '';
+            elProto.ignore =
+                elProto.silent =
+                    elProto.isGroup =
+                        elProto.draggable =
+                            elProto.dragging =
+                                elProto.ignoreClip =
+                                    elProto.__inHover = false;
+            elProto.__dirty = REDRAW_BIT;
+            var logs = {};
+            function logDeprecatedError(key, xKey, yKey) {
+                if (!logs[key + xKey + yKey]) {
+                    console.warn("DEPRECATED: '".concat(key, "' has been deprecated. use '").concat(xKey, "', '").concat(yKey, "' instead"));
+                    logs[key + xKey + yKey] = true;
+                }
+            }
+            function createLegacyProperty(key, privateKey, xKey, yKey) {
+                Object.defineProperty(elProto, key, {
+                    get: function () {
+                        {
+                            logDeprecatedError(key, xKey, yKey);
+                        }
+                        if (!this[privateKey]) {
+                            var pos = this[privateKey] = [];
+                            enhanceArray(this, pos);
+                        }
+                        return this[privateKey];
+                    },
+                    set: function (pos) {
+                        {
+                            logDeprecatedError(key, xKey, yKey);
+                        }
+                        this[xKey] = pos[0];
+                        this[yKey] = pos[1];
+                        this[privateKey] = pos;
+                        enhanceArray(this, pos);
+                    }
+                });
+                function enhanceArray(self, pos) {
+                    Object.defineProperty(pos, 0, {
+                        get: function () {
+                            return self[xKey];
+                        },
+                        set: function (val) {
+                            self[xKey] = val;
+                        }
+                    });
+                    Object.defineProperty(pos, 1, {
+                        get: function () {
+                            return self[yKey];
+                        },
+                        set: function (val) {
+                            self[yKey] = val;
+                        }
+                    });
+                }
+            }
+            if (Object.defineProperty) {
+                createLegacyProperty('position', '_legacyPos', 'x', 'y');
+                createLegacyProperty('scale', '_legacyScale', 'scaleX', 'scaleY');
+                createLegacyProperty('origin', '_legacyOrigin', 'originX', 'originY');
+            }
+        })();
+        return Element;
+    }());
+    mixin(Element, Eventful);
+    mixin(Element, Transformable);
+    function animateTo(animatable, target, cfg, animationProps, reverse) {
+        cfg = cfg || {};
+        var animators = [];
+        animateToShallow(animatable, '', animatable, target, cfg, animationProps, animators, reverse);
+        var finishCount = animators.length;
+        var doneHappened = false;
+        var cfgDone = cfg.done;
+        var cfgAborted = cfg.aborted;
+        var doneCb = function () {
+            doneHappened = true;
+            finishCount--;
+            if (finishCount <= 0) {
+                doneHappened
+                    ? (cfgDone && cfgDone())
+                    : (cfgAborted && cfgAborted());
+            }
+        };
+        var abortedCb = function () {
+            finishCount--;
+            if (finishCount <= 0) {
+                doneHappened
+                    ? (cfgDone && cfgDone())
+                    : (cfgAborted && cfgAborted());
+            }
+        };
+        if (!finishCount) {
+            cfgDone && cfgDone();
+        }
+        if (animators.length > 0 && cfg.during) {
+            animators[0].during(function (target, percent) {
+                cfg.during(percent);
+            });
+        }
+        for (var i = 0; i < animators.length; i++) {
+            var animator = animators[i];
+            if (doneCb) {
+                animator.done(doneCb);
+            }
+            if (abortedCb) {
+                animator.aborted(abortedCb);
+            }
+            if (cfg.force) {
+                animator.duration(cfg.duration);
+            }
+            animator.start(cfg.easing);
+        }
+        return animators;
+    }
+    function copyArrShallow(source, target, len) {
+        for (var i = 0; i < len; i++) {
+            source[i] = target[i];
+        }
+    }
+    function is2DArray(value) {
+        return isArrayLike(value[0]);
+    }
+    function copyValue(target, source, key) {
+        if (isArrayLike(source[key])) {
+            if (!isArrayLike(target[key])) {
+                target[key] = [];
+            }
+            if (isTypedArray(source[key])) {
+                var len = source[key].length;
+                if (target[key].length !== len) {
+                    target[key] = new (source[key].constructor)(len);
+                    copyArrShallow(target[key], source[key], len);
+                }
+            }
+            else {
+                var sourceArr = source[key];
+                var targetArr = target[key];
+                var len0 = sourceArr.length;
+                if (is2DArray(sourceArr)) {
+                    var len1 = sourceArr[0].length;
+                    for (var i = 0; i < len0; i++) {
+                        if (!targetArr[i]) {
+                            targetArr[i] = Array.prototype.slice.call(sourceArr[i]);
+                        }
+                        else {
+                            copyArrShallow(targetArr[i], sourceArr[i], len1);
+                        }
+                    }
+                }
+                else {
+                    copyArrShallow(targetArr, sourceArr, len0);
+                }
+                targetArr.length = sourceArr.length;
+            }
+        }
+        else {
+            target[key] = source[key];
+        }
+    }
+    function isValueSame(val1, val2) {
+        return val1 === val2
+            || isArrayLike(val1) && isArrayLike(val2) && is1DArraySame(val1, val2);
+    }
+    function is1DArraySame(arr0, arr1) {
+        var len = arr0.length;
+        if (len !== arr1.length) {
+            return false;
+        }
+        for (var i = 0; i < len; i++) {
+            if (arr0[i] !== arr1[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    function animateToShallow(animatable, topKey, animateObj, target, cfg, animationProps, animators, reverse) {
+        var targetKeys = keys(target);
+        var duration = cfg.duration;
+        var delay = cfg.delay;
+        var additive = cfg.additive;
+        var setToFinal = cfg.setToFinal;
+        var animateAll = !isObject(animationProps);
+        var existsAnimators = animatable.animators;
+        var animationKeys = [];
+        for (var k = 0; k < targetKeys.length; k++) {
+            var innerKey = targetKeys[k];
+            var targetVal = target[innerKey];
+            if (targetVal != null && animateObj[innerKey] != null
+                && (animateAll || animationProps[innerKey])) {
+                if (isObject(targetVal)
+                    && !isArrayLike(targetVal)
+                    && !isGradientObject(targetVal)) {
+                    if (topKey) {
+                        if (!reverse) {
+                            animateObj[innerKey] = targetVal;
+                            animatable.updateDuringAnimation(topKey);
+                        }
+                        continue;
+                    }
+                    animateToShallow(animatable, innerKey, animateObj[innerKey], targetVal, cfg, animationProps && animationProps[innerKey], animators, reverse);
+                }
+                else {
+                    animationKeys.push(innerKey);
+                }
+            }
+            else if (!reverse) {
+                animateObj[innerKey] = targetVal;
+                animatable.updateDuringAnimation(topKey);
+                animationKeys.push(innerKey);
+            }
+        }
+        var keyLen = animationKeys.length;
+        if (!additive && keyLen) {
+            for (var i = 0; i < existsAnimators.length; i++) {
+                var animator = existsAnimators[i];
+                if (animator.targetName === topKey) {
+                    var allAborted = animator.stopTracks(animationKeys);
+                    if (allAborted) {
+                        var idx = indexOf(existsAnimators, animator);
+                        existsAnimators.splice(idx, 1);
+                    }
+                }
+            }
+        }
+        if (!cfg.force) {
+            animationKeys = filter(animationKeys, function (key) { return !isValueSame(target[key], animateObj[key]); });
+            keyLen = animationKeys.length;
+        }
+        if (keyLen > 0
+            || (cfg.force && !animators.length)) {
+            var revertedSource = void 0;
+            var reversedTarget = void 0;
+            var sourceClone = void 0;
+            if (reverse) {
+                reversedTarget = {};
+                if (setToFinal) {
+                    revertedSource = {};
+                }
+                for (var i = 0; i < keyLen; i++) {
+                    var innerKey = animationKeys[i];
+                    reversedTarget[innerKey] = animateObj[innerKey];
+                    if (setToFinal) {
+                        revertedSource[innerKey] = target[innerKey];
+                    }
+                    else {
+                        animateObj[innerKey] = target[innerKey];
+                    }
+                }
+            }
+            else if (setToFinal) {
+                sourceClone = {};
+                for (var i = 0; i < keyLen; i++) {
+                    var innerKey = animationKeys[i];
+                    sourceClone[innerKey] = cloneValue(animateObj[innerKey]);
+                    copyValue(animateObj, target, innerKey);
+                }
+            }
+            var animator = new Animator(animateObj, false, false, additive ? filter(existsAnimators, function (animator) { return animator.targetName === topKey; }) : null);
+            animator.targetName = topKey;
+            if (cfg.scope) {
+                animator.scope = cfg.scope;
+            }
+            if (setToFinal && revertedSource) {
+                animator.whenWithKeys(0, revertedSource, animationKeys);
+            }
+            if (sourceClone) {
+                animator.whenWithKeys(0, sourceClone, animationKeys);
+            }
+            animator.whenWithKeys(duration == null ? 500 : duration, reverse ? reversedTarget : target, animationKeys).delay(delay || 0);
+            animatable.addAnimator(animator, topKey);
+            animators.push(animator);
+        }
+    }
+
+    var Group = (function (_super) {
+        __extends(Group, _super);
+        function Group(opts) {
+            var _this = _super.call(this) || this;
+            _this.isGroup = true;
+            _this._children = [];
+            _this.attr(opts);
+            return _this;
+        }
+        Group.prototype.childrenRef = function () {
+            return this._children;
+        };
+        Group.prototype.children = function () {
+            return this._children.slice();
+        };
+        Group.prototype.childAt = function (idx) {
+            return this._children[idx];
+        };
+        Group.prototype.childOfName = function (name) {
+            var children = this._children;
+            for (var i = 0; i < children.length; i++) {
+                if (children[i].name === name) {
+                    return children[i];
+                }
+            }
+        };
+        Group.prototype.childCount = function () {
+            return this._children.length;
+        };
+        Group.prototype.add = function (child) {
+            if (child) {
+                if (child !== this && child.parent !== this) {
+                    this._children.push(child);
+                    this._doAdd(child);
+                }
+                {
+                    if (child.__hostTarget) {
+                        throw 'This elemenet has been used as an attachment';
+                    }
+                }
+            }
+            return this;
+        };
+        Group.prototype.addBefore = function (child, nextSibling) {
+            if (child && child !== this && child.parent !== this
+                && nextSibling && nextSibling.parent === this) {
+                var children = this._children;
+                var idx = children.indexOf(nextSibling);
+                if (idx >= 0) {
+                    children.splice(idx, 0, child);
+                    this._doAdd(child);
+                }
+            }
+            return this;
+        };
+        Group.prototype.replace = function (oldChild, newChild) {
+            var idx = indexOf(this._children, oldChild);
+            if (idx >= 0) {
+                this.replaceAt(newChild, idx);
+            }
+            return this;
+        };
+        Group.prototype.replaceAt = function (child, index) {
+            var children = this._children;
+            var old = children[index];
+            if (child && child !== this && child.parent !== this && child !== old) {
+                children[index] = child;
+                old.parent = null;
+                var zr = this.__zr;
+                if (zr) {
+                    old.removeSelfFromZr(zr);
+                }
+                this._doAdd(child);
+            }
+            return this;
+        };
+        Group.prototype._doAdd = function (child) {
+            if (child.parent) {
+                child.parent.remove(child);
+            }
+            child.parent = this;
+            var zr = this.__zr;
+            if (zr && zr !== child.__zr) {
+                child.addSelfToZr(zr);
+            }
+            zr && zr.refresh();
+        };
+        Group.prototype.remove = function (child) {
+            var zr = this.__zr;
+            var children = this._children;
+            var idx = indexOf(children, child);
+            if (idx < 0) {
+                return this;
+            }
+            children.splice(idx, 1);
+            child.parent = null;
+            if (zr) {
+                child.removeSelfFromZr(zr);
+            }
+            zr && zr.refresh();
+            return this;
+        };
+        Group.prototype.removeAll = function () {
+            var children = this._children;
+            var zr = this.__zr;
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                if (zr) {
+                    child.removeSelfFromZr(zr);
+                }
+                child.parent = null;
+            }
+            children.length = 0;
+            return this;
+        };
+        Group.prototype.eachChild = function (cb, context) {
+            var children = this._children;
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                cb.call(context, child, i);
+            }
+            return this;
+        };
+        Group.prototype.traverse = function (cb, context) {
+            for (var i = 0; i < this._children.length; i++) {
+                var child = this._children[i];
+                var stopped = cb.call(context, child);
+                if (child.isGroup && !stopped) {
+                    child.traverse(cb, context);
+                }
+            }
+            return this;
+        };
+        Group.prototype.addSelfToZr = function (zr) {
+            _super.prototype.addSelfToZr.call(this, zr);
+            for (var i = 0; i < this._children.length; i++) {
+                var child = this._children[i];
+                child.addSelfToZr(zr);
+            }
+        };
+        Group.prototype.removeSelfFromZr = function (zr) {
+            _super.prototype.removeSelfFromZr.call(this, zr);
+            for (var i = 0; i < this._children.length; i++) {
+                var child = this._children[i];
+                child.removeSelfFromZr(zr);
+            }
+        };
+        Group.prototype.getBoundingRect = function (includeChildren) {
+            var tmpRect = new BoundingRect(0, 0, 0, 0);
+            var children = includeChildren || this._children;
+            var tmpMat = [];
+            var rect = null;
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                if (child.ignore || child.invisible) {
+                    continue;
+                }
+                var childRect = child.getBoundingRect();
+                var transform = child.getLocalTransform(tmpMat);
+                if (transform) {
+                    BoundingRect.applyTransform(tmpRect, childRect, transform);
+                    rect = rect || tmpRect.clone();
+                    rect.union(tmpRect);
+                }
+                else {
+                    rect = rect || childRect.clone();
+                    rect.union(childRect);
+                }
+            }
+            return rect || tmpRect;
+        };
+        return Group;
+    }(Element));
+    Group.prototype.type = 'group';
+
     var BUILTIN_OBJECT = reduce([
         'Function',
         'RegExp',
@@ -194,6 +4697,12 @@
     var protoFunction = ctorFunction ? ctorFunction.prototype : null;
     var protoKey = '__proto__';
     var idStart = 0x0907;
+    function getParents(element) {
+        if (element.parent instanceof Group) {
+            return __spreadArray([element.parent], getParents(element.parent), true);
+        }
+        return [];
+    }
     function guid() {
         return idStart++;
     }
@@ -206,7 +4715,7 @@
             console.error.apply(console, args);
         }
     }
-    function clone(source) {
+    function clone$2(source) {
         if (source == null || typeof source !== 'object') {
             return source;
         }
@@ -216,7 +4725,7 @@
             if (!isPrimitive(source)) {
                 result = [];
                 for (var i = 0, len = source.length; i < len; i++) {
-                    result[i] = clone(source[i]);
+                    result[i] = clone$2(source[i]);
                 }
             }
         }
@@ -238,7 +4747,7 @@
             result = {};
             for (var key in source) {
                 if (source.hasOwnProperty(key) && key !== protoKey) {
-                    result[key] = clone(source[key]);
+                    result[key] = clone$2(source[key]);
                 }
             }
         }
@@ -246,7 +4755,7 @@
     }
     function merge(target, source, overwrite) {
         if (!isObject(source) || !isObject(target)) {
-            return overwrite ? clone(source) : target;
+            return overwrite ? clone$2(source) : target;
         }
         for (var key in source) {
             if (source.hasOwnProperty(key) && key !== protoKey) {
@@ -265,7 +4774,7 @@
                     merge(targetProp, sourceProp, overwrite);
                 }
                 else if (overwrite || !(key in target)) {
-                    target[key] = clone(source[key]);
+                    target[key] = clone$2(source[key]);
                 }
             }
         }
@@ -699,9 +5208,10 @@
 
     var util = /*#__PURE__*/Object.freeze({
         __proto__: null,
+        getParents: getParents,
         guid: guid,
         logError: logError,
-        clone: clone,
+        clone: clone$2,
         merge: merge,
         mergeAll: mergeAll,
         extend: extend,
@@ -749,177 +5259,6 @@
         hasOwn: hasOwn,
         noop: noop,
         RADIAN_TO_DEGREE: RADIAN_TO_DEGREE
-    });
-
-    /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-    this file except in compliance with the License. You may obtain a copy of the
-    License at http://www.apache.org/licenses/LICENSE-2.0
-
-    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-    MERCHANTABLITY OR NON-INFRINGEMENT.
-
-    See the Apache Version 2.0 License for specific language governing permissions
-    and limitations under the License.
-    ***************************************************************************** */
-    /* global Reflect, Promise */
-
-    var extendStatics = function(d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-
-    function __extends(d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    }
-
-    function create(x, y) {
-        if (x == null) {
-            x = 0;
-        }
-        if (y == null) {
-            y = 0;
-        }
-        return [x, y];
-    }
-    function copy(out, v) {
-        out[0] = v[0];
-        out[1] = v[1];
-        return out;
-    }
-    function clone$1(v) {
-        return [v[0], v[1]];
-    }
-    function set(out, a, b) {
-        out[0] = a;
-        out[1] = b;
-        return out;
-    }
-    function add(out, v1, v2) {
-        out[0] = v1[0] + v2[0];
-        out[1] = v1[1] + v2[1];
-        return out;
-    }
-    function scaleAndAdd(out, v1, v2, a) {
-        out[0] = v1[0] + v2[0] * a;
-        out[1] = v1[1] + v2[1] * a;
-        return out;
-    }
-    function sub(out, v1, v2) {
-        out[0] = v1[0] - v2[0];
-        out[1] = v1[1] - v2[1];
-        return out;
-    }
-    function len(v) {
-        return Math.sqrt(lenSquare(v));
-    }
-    var length = len;
-    function lenSquare(v) {
-        return v[0] * v[0] + v[1] * v[1];
-    }
-    var lengthSquare = lenSquare;
-    function mul(out, v1, v2) {
-        out[0] = v1[0] * v2[0];
-        out[1] = v1[1] * v2[1];
-        return out;
-    }
-    function div(out, v1, v2) {
-        out[0] = v1[0] / v2[0];
-        out[1] = v1[1] / v2[1];
-        return out;
-    }
-    function dot(v1, v2) {
-        return v1[0] * v2[0] + v1[1] * v2[1];
-    }
-    function scale(out, v, s) {
-        out[0] = v[0] * s;
-        out[1] = v[1] * s;
-        return out;
-    }
-    function normalize(out, v) {
-        var d = len(v);
-        if (d === 0) {
-            out[0] = 0;
-            out[1] = 0;
-        }
-        else {
-            out[0] = v[0] / d;
-            out[1] = v[1] / d;
-        }
-        return out;
-    }
-    function distance(v1, v2) {
-        return Math.sqrt((v1[0] - v2[0]) * (v1[0] - v2[0])
-            + (v1[1] - v2[1]) * (v1[1] - v2[1]));
-    }
-    var dist = distance;
-    function distanceSquare(v1, v2) {
-        return (v1[0] - v2[0]) * (v1[0] - v2[0])
-            + (v1[1] - v2[1]) * (v1[1] - v2[1]);
-    }
-    var distSquare = distanceSquare;
-    function negate(out, v) {
-        out[0] = -v[0];
-        out[1] = -v[1];
-        return out;
-    }
-    function lerp(out, v1, v2, t) {
-        out[0] = v1[0] + t * (v2[0] - v1[0]);
-        out[1] = v1[1] + t * (v2[1] - v1[1]);
-        return out;
-    }
-    function applyTransform(out, v, m) {
-        var x = v[0];
-        var y = v[1];
-        out[0] = m[0] * x + m[2] * y + m[4];
-        out[1] = m[1] * x + m[3] * y + m[5];
-        return out;
-    }
-    function min(out, v1, v2) {
-        out[0] = Math.min(v1[0], v2[0]);
-        out[1] = Math.min(v1[1], v2[1]);
-        return out;
-    }
-    function max(out, v1, v2) {
-        out[0] = Math.max(v1[0], v2[0]);
-        out[1] = Math.max(v1[1], v2[1]);
-        return out;
-    }
-
-    var vector = /*#__PURE__*/Object.freeze({
-        __proto__: null,
-        create: create,
-        copy: copy,
-        clone: clone$1,
-        set: set,
-        add: add,
-        scaleAndAdd: scaleAndAdd,
-        sub: sub,
-        len: len,
-        length: length,
-        lenSquare: lenSquare,
-        lengthSquare: lengthSquare,
-        mul: mul,
-        div: div,
-        dot: dot,
-        scale: scale,
-        normalize: normalize,
-        distance: distance,
-        dist: dist,
-        distanceSquare: distanceSquare,
-        distSquare: distSquare,
-        negate: negate,
-        lerp: lerp,
-        applyTransform: applyTransform,
-        min: min,
-        max: max
     });
 
     var Param = (function () {
@@ -986,168 +5325,6 @@
             this._dropTarget = null;
         };
         return Draggable;
-    }());
-
-    var Eventful = (function () {
-        function Eventful(eventProcessors) {
-            if (eventProcessors) {
-                this._$eventProcessor = eventProcessors;
-            }
-        }
-        Eventful.prototype.on = function (event, query, handler, context) {
-            if (!this._$handlers) {
-                this._$handlers = {};
-            }
-            var _h = this._$handlers;
-            if (typeof query === 'function') {
-                context = handler;
-                handler = query;
-                query = null;
-            }
-            if (!handler || !event) {
-                return this;
-            }
-            var eventProcessor = this._$eventProcessor;
-            if (query != null && eventProcessor && eventProcessor.normalizeQuery) {
-                query = eventProcessor.normalizeQuery(query);
-            }
-            if (!_h[event]) {
-                _h[event] = [];
-            }
-            for (var i = 0; i < _h[event].length; i++) {
-                if (_h[event][i].h === handler) {
-                    return this;
-                }
-            }
-            var wrap = {
-                h: handler,
-                query: query,
-                ctx: (context || this),
-                callAtLast: handler.zrEventfulCallAtLast
-            };
-            var lastIndex = _h[event].length - 1;
-            var lastWrap = _h[event][lastIndex];
-            (lastWrap && lastWrap.callAtLast)
-                ? _h[event].splice(lastIndex, 0, wrap)
-                : _h[event].push(wrap);
-            return this;
-        };
-        Eventful.prototype.isSilent = function (eventName) {
-            var _h = this._$handlers;
-            return !_h || !_h[eventName] || !_h[eventName].length;
-        };
-        Eventful.prototype.off = function (eventType, handler) {
-            var _h = this._$handlers;
-            if (!_h) {
-                return this;
-            }
-            if (!eventType) {
-                this._$handlers = {};
-                return this;
-            }
-            if (handler) {
-                if (_h[eventType]) {
-                    var newList = [];
-                    for (var i = 0, l = _h[eventType].length; i < l; i++) {
-                        if (_h[eventType][i].h !== handler) {
-                            newList.push(_h[eventType][i]);
-                        }
-                    }
-                    _h[eventType] = newList;
-                }
-                if (_h[eventType] && _h[eventType].length === 0) {
-                    delete _h[eventType];
-                }
-            }
-            else {
-                delete _h[eventType];
-            }
-            return this;
-        };
-        Eventful.prototype.trigger = function (eventType) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            if (!this._$handlers) {
-                return this;
-            }
-            var _h = this._$handlers[eventType];
-            var eventProcessor = this._$eventProcessor;
-            if (_h) {
-                var argLen = args.length;
-                var len = _h.length;
-                for (var i = 0; i < len; i++) {
-                    var hItem = _h[i];
-                    if (eventProcessor
-                        && eventProcessor.filter
-                        && hItem.query != null
-                        && !eventProcessor.filter(eventType, hItem.query)) {
-                        continue;
-                    }
-                    switch (argLen) {
-                        case 0:
-                            hItem.h.call(hItem.ctx);
-                            break;
-                        case 1:
-                            hItem.h.call(hItem.ctx, args[0]);
-                            break;
-                        case 2:
-                            hItem.h.call(hItem.ctx, args[0], args[1]);
-                            break;
-                        default:
-                            hItem.h.apply(hItem.ctx, args);
-                            break;
-                    }
-                }
-            }
-            eventProcessor && eventProcessor.afterTrigger
-                && eventProcessor.afterTrigger(eventType);
-            return this;
-        };
-        Eventful.prototype.triggerWithContext = function (type) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            if (!this._$handlers) {
-                return this;
-            }
-            var _h = this._$handlers[type];
-            var eventProcessor = this._$eventProcessor;
-            if (_h) {
-                var argLen = args.length;
-                var ctx = args[argLen - 1];
-                var len = _h.length;
-                for (var i = 0; i < len; i++) {
-                    var hItem = _h[i];
-                    if (eventProcessor
-                        && eventProcessor.filter
-                        && hItem.query != null
-                        && !eventProcessor.filter(type, hItem.query)) {
-                        continue;
-                    }
-                    switch (argLen) {
-                        case 0:
-                            hItem.h.call(ctx);
-                            break;
-                        case 1:
-                            hItem.h.call(ctx, args[0]);
-                            break;
-                        case 2:
-                            hItem.h.call(ctx, args[0], args[1]);
-                            break;
-                        default:
-                            hItem.h.apply(ctx, args.slice(1, argLen - 1));
-                            break;
-                    }
-                }
-            }
-            eventProcessor && eventProcessor.afterTrigger
-                && eventProcessor.afterTrigger(type);
-            return this;
-        };
-        return Eventful;
     }());
 
     var LN2 = Math.log(2);
@@ -1479,461 +5656,6 @@
             }
         }
     };
-
-    function create$1() {
-        return [1, 0, 0, 1, 0, 0];
-    }
-    function identity(out) {
-        out[0] = 1;
-        out[1] = 0;
-        out[2] = 0;
-        out[3] = 1;
-        out[4] = 0;
-        out[5] = 0;
-        return out;
-    }
-    function copy$1(out, m) {
-        out[0] = m[0];
-        out[1] = m[1];
-        out[2] = m[2];
-        out[3] = m[3];
-        out[4] = m[4];
-        out[5] = m[5];
-        return out;
-    }
-    function mul$1(out, m1, m2) {
-        var out0 = m1[0] * m2[0] + m1[2] * m2[1];
-        var out1 = m1[1] * m2[0] + m1[3] * m2[1];
-        var out2 = m1[0] * m2[2] + m1[2] * m2[3];
-        var out3 = m1[1] * m2[2] + m1[3] * m2[3];
-        var out4 = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
-        var out5 = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
-        out[0] = out0;
-        out[1] = out1;
-        out[2] = out2;
-        out[3] = out3;
-        out[4] = out4;
-        out[5] = out5;
-        return out;
-    }
-    function translate(out, a, v) {
-        out[0] = a[0];
-        out[1] = a[1];
-        out[2] = a[2];
-        out[3] = a[3];
-        out[4] = a[4] + v[0];
-        out[5] = a[5] + v[1];
-        return out;
-    }
-    function rotate(out, a, rad, pivot) {
-        if (pivot === void 0) { pivot = [0, 0]; }
-        var aa = a[0];
-        var ac = a[2];
-        var atx = a[4];
-        var ab = a[1];
-        var ad = a[3];
-        var aty = a[5];
-        var st = Math.sin(rad);
-        var ct = Math.cos(rad);
-        out[0] = aa * ct + ab * st;
-        out[1] = -aa * st + ab * ct;
-        out[2] = ac * ct + ad * st;
-        out[3] = -ac * st + ct * ad;
-        out[4] = ct * (atx - pivot[0]) + st * (aty - pivot[1]) + pivot[0];
-        out[5] = ct * (aty - pivot[1]) - st * (atx - pivot[0]) + pivot[1];
-        return out;
-    }
-    function scale$1(out, a, v) {
-        var vx = v[0];
-        var vy = v[1];
-        out[0] = a[0] * vx;
-        out[1] = a[1] * vy;
-        out[2] = a[2] * vx;
-        out[3] = a[3] * vy;
-        out[4] = a[4] * vx;
-        out[5] = a[5] * vy;
-        return out;
-    }
-    function invert(out, a) {
-        var aa = a[0];
-        var ac = a[2];
-        var atx = a[4];
-        var ab = a[1];
-        var ad = a[3];
-        var aty = a[5];
-        var det = aa * ad - ab * ac;
-        if (!det) {
-            return null;
-        }
-        det = 1.0 / det;
-        out[0] = ad * det;
-        out[1] = -ab * det;
-        out[2] = -ac * det;
-        out[3] = aa * det;
-        out[4] = (ac * aty - ad * atx) * det;
-        out[5] = (ab * atx - aa * aty) * det;
-        return out;
-    }
-    function clone$2(a) {
-        var b = create$1();
-        copy$1(b, a);
-        return b;
-    }
-
-    var matrix = /*#__PURE__*/Object.freeze({
-        __proto__: null,
-        create: create$1,
-        identity: identity,
-        copy: copy$1,
-        mul: mul$1,
-        translate: translate,
-        rotate: rotate,
-        scale: scale$1,
-        invert: invert,
-        clone: clone$2
-    });
-
-    var Point = (function () {
-        function Point(x, y) {
-            this.x = x || 0;
-            this.y = y || 0;
-        }
-        Point.prototype.copy = function (other) {
-            this.x = other.x;
-            this.y = other.y;
-            return this;
-        };
-        Point.prototype.clone = function () {
-            return new Point(this.x, this.y);
-        };
-        Point.prototype.set = function (x, y) {
-            this.x = x;
-            this.y = y;
-            return this;
-        };
-        Point.prototype.equal = function (other) {
-            return other.x === this.x && other.y === this.y;
-        };
-        Point.prototype.add = function (other) {
-            this.x += other.x;
-            this.y += other.y;
-            return this;
-        };
-        Point.prototype.scale = function (scalar) {
-            this.x *= scalar;
-            this.y *= scalar;
-        };
-        Point.prototype.scaleAndAdd = function (other, scalar) {
-            this.x += other.x * scalar;
-            this.y += other.y * scalar;
-        };
-        Point.prototype.sub = function (other) {
-            this.x -= other.x;
-            this.y -= other.y;
-            return this;
-        };
-        Point.prototype.dot = function (other) {
-            return this.x * other.x + this.y * other.y;
-        };
-        Point.prototype.len = function () {
-            return Math.sqrt(this.x * this.x + this.y * this.y);
-        };
-        Point.prototype.lenSquare = function () {
-            return this.x * this.x + this.y * this.y;
-        };
-        Point.prototype.normalize = function () {
-            var len = this.len();
-            this.x /= len;
-            this.y /= len;
-            return this;
-        };
-        Point.prototype.distance = function (other) {
-            var dx = this.x - other.x;
-            var dy = this.y - other.y;
-            return Math.sqrt(dx * dx + dy * dy);
-        };
-        Point.prototype.distanceSquare = function (other) {
-            var dx = this.x - other.x;
-            var dy = this.y - other.y;
-            return dx * dx + dy * dy;
-        };
-        Point.prototype.negate = function () {
-            this.x = -this.x;
-            this.y = -this.y;
-            return this;
-        };
-        Point.prototype.transform = function (m) {
-            if (!m) {
-                return;
-            }
-            var x = this.x;
-            var y = this.y;
-            this.x = m[0] * x + m[2] * y + m[4];
-            this.y = m[1] * x + m[3] * y + m[5];
-            return this;
-        };
-        Point.prototype.toArray = function (out) {
-            out[0] = this.x;
-            out[1] = this.y;
-            return out;
-        };
-        Point.prototype.fromArray = function (input) {
-            this.x = input[0];
-            this.y = input[1];
-        };
-        Point.set = function (p, x, y) {
-            p.x = x;
-            p.y = y;
-        };
-        Point.copy = function (p, p2) {
-            p.x = p2.x;
-            p.y = p2.y;
-        };
-        Point.len = function (p) {
-            return Math.sqrt(p.x * p.x + p.y * p.y);
-        };
-        Point.lenSquare = function (p) {
-            return p.x * p.x + p.y * p.y;
-        };
-        Point.dot = function (p0, p1) {
-            return p0.x * p1.x + p0.y * p1.y;
-        };
-        Point.add = function (out, p0, p1) {
-            out.x = p0.x + p1.x;
-            out.y = p0.y + p1.y;
-        };
-        Point.sub = function (out, p0, p1) {
-            out.x = p0.x - p1.x;
-            out.y = p0.y - p1.y;
-        };
-        Point.scale = function (out, p0, scalar) {
-            out.x = p0.x * scalar;
-            out.y = p0.y * scalar;
-        };
-        Point.scaleAndAdd = function (out, p0, p1, scalar) {
-            out.x = p0.x + p1.x * scalar;
-            out.y = p0.y + p1.y * scalar;
-        };
-        Point.lerp = function (out, p0, p1, t) {
-            var onet = 1 - t;
-            out.x = onet * p0.x + t * p1.x;
-            out.y = onet * p0.y + t * p1.y;
-        };
-        return Point;
-    }());
-
-    var mathMin = Math.min;
-    var mathMax = Math.max;
-    var lt = new Point();
-    var rb = new Point();
-    var lb = new Point();
-    var rt = new Point();
-    var minTv = new Point();
-    var maxTv = new Point();
-    var BoundingRect = (function () {
-        function BoundingRect(x, y, width, height) {
-            if (width < 0) {
-                x = x + width;
-                width = -width;
-            }
-            if (height < 0) {
-                y = y + height;
-                height = -height;
-            }
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-        BoundingRect.prototype.union = function (other) {
-            var x = mathMin(other.x, this.x);
-            var y = mathMin(other.y, this.y);
-            if (isFinite(this.x) && isFinite(this.width)) {
-                this.width = mathMax(other.x + other.width, this.x + this.width) - x;
-            }
-            else {
-                this.width = other.width;
-            }
-            if (isFinite(this.y) && isFinite(this.height)) {
-                this.height = mathMax(other.y + other.height, this.y + this.height) - y;
-            }
-            else {
-                this.height = other.height;
-            }
-            this.x = x;
-            this.y = y;
-        };
-        BoundingRect.prototype.applyTransform = function (m) {
-            BoundingRect.applyTransform(this, this, m);
-        };
-        BoundingRect.prototype.calculateTransform = function (b) {
-            var a = this;
-            var sx = b.width / a.width;
-            var sy = b.height / a.height;
-            var m = create$1();
-            translate(m, m, [-a.x, -a.y]);
-            scale$1(m, m, [sx, sy]);
-            translate(m, m, [b.x, b.y]);
-            return m;
-        };
-        BoundingRect.prototype.intersect = function (b, mtv) {
-            if (!b) {
-                return false;
-            }
-            if (!(b instanceof BoundingRect)) {
-                b = BoundingRect.create(b);
-            }
-            var a = this;
-            var ax0 = a.x;
-            var ax1 = a.x + a.width;
-            var ay0 = a.y;
-            var ay1 = a.y + a.height;
-            var bx0 = b.x;
-            var bx1 = b.x + b.width;
-            var by0 = b.y;
-            var by1 = b.y + b.height;
-            var overlap = !(ax1 < bx0 || bx1 < ax0 || ay1 < by0 || by1 < ay0);
-            if (mtv) {
-                var dMin = Infinity;
-                var dMax = 0;
-                var d0 = Math.abs(ax1 - bx0);
-                var d1 = Math.abs(bx1 - ax0);
-                var d2 = Math.abs(ay1 - by0);
-                var d3 = Math.abs(by1 - ay0);
-                var dx = Math.min(d0, d1);
-                var dy = Math.min(d2, d3);
-                if (ax1 < bx0 || bx1 < ax0) {
-                    if (dx > dMax) {
-                        dMax = dx;
-                        if (d0 < d1) {
-                            Point.set(maxTv, -d0, 0);
-                        }
-                        else {
-                            Point.set(maxTv, d1, 0);
-                        }
-                    }
-                }
-                else {
-                    if (dx < dMin) {
-                        dMin = dx;
-                        if (d0 < d1) {
-                            Point.set(minTv, d0, 0);
-                        }
-                        else {
-                            Point.set(minTv, -d1, 0);
-                        }
-                    }
-                }
-                if (ay1 < by0 || by1 < ay0) {
-                    if (dy > dMax) {
-                        dMax = dy;
-                        if (d2 < d3) {
-                            Point.set(maxTv, 0, -d2);
-                        }
-                        else {
-                            Point.set(maxTv, 0, d3);
-                        }
-                    }
-                }
-                else {
-                    if (dx < dMin) {
-                        dMin = dx;
-                        if (d2 < d3) {
-                            Point.set(minTv, 0, d2);
-                        }
-                        else {
-                            Point.set(minTv, 0, -d3);
-                        }
-                    }
-                }
-            }
-            if (mtv) {
-                Point.copy(mtv, overlap ? minTv : maxTv);
-            }
-            return overlap;
-        };
-        BoundingRect.prototype.contain = function (x, y) {
-            var rect = this;
-            return x >= rect.x
-                && x <= (rect.x + rect.width)
-                && y >= rect.y
-                && y <= (rect.y + rect.height);
-        };
-        BoundingRect.prototype.clone = function () {
-            return new BoundingRect(this.x, this.y, this.width, this.height);
-        };
-        BoundingRect.prototype.copy = function (other) {
-            BoundingRect.copy(this, other);
-        };
-        BoundingRect.prototype.plain = function () {
-            return {
-                x: this.x,
-                y: this.y,
-                width: this.width,
-                height: this.height
-            };
-        };
-        BoundingRect.prototype.isFinite = function () {
-            return isFinite(this.x)
-                && isFinite(this.y)
-                && isFinite(this.width)
-                && isFinite(this.height);
-        };
-        BoundingRect.prototype.isZero = function () {
-            return this.width === 0 || this.height === 0;
-        };
-        BoundingRect.create = function (rect) {
-            return new BoundingRect(rect.x, rect.y, rect.width, rect.height);
-        };
-        BoundingRect.copy = function (target, source) {
-            target.x = source.x;
-            target.y = source.y;
-            target.width = source.width;
-            target.height = source.height;
-        };
-        BoundingRect.applyTransform = function (target, source, m) {
-            if (!m) {
-                if (target !== source) {
-                    BoundingRect.copy(target, source);
-                }
-                return;
-            }
-            if (m[1] < 1e-5 && m[1] > -1e-5 && m[2] < 1e-5 && m[2] > -1e-5) {
-                var sx = m[0];
-                var sy = m[3];
-                var tx = m[4];
-                var ty = m[5];
-                target.x = source.x * sx + tx;
-                target.y = source.y * sy + ty;
-                target.width = source.width * sx;
-                target.height = source.height * sy;
-                if (target.width < 0) {
-                    target.x += target.width;
-                    target.width = -target.width;
-                }
-                if (target.height < 0) {
-                    target.y += target.height;
-                    target.height = -target.height;
-                }
-                return;
-            }
-            lt.x = lb.x = source.x;
-            lt.y = rt.y = source.y;
-            rb.x = rt.x = source.x + source.width;
-            rb.y = lb.y = source.y + source.height;
-            lt.transform(m);
-            rt.transform(m);
-            rb.transform(m);
-            lb.transform(m);
-            target.x = mathMin(lt.x, rb.x, lb.x, rt.x);
-            target.y = mathMin(lt.y, rb.y, lb.y, rt.y);
-            var maxX = mathMax(lt.x, rb.x, lb.x, rt.x);
-            var maxY = mathMax(lt.y, rb.y, lb.y, rt.y);
-            target.width = maxX - target.x;
-            target.height = maxY - target.y;
-        };
-        return BoundingRect;
-    }());
 
     var SILENT = 'silent';
     function makeEventPacket(eveType, targetInfo, event) {
@@ -2745,10 +6467,6 @@
         ts.forceMergeRuns();
     }
 
-    var REDRAW_BIT = 1;
-    var STYLE_CHANGED_BIT = 2;
-    var SHAPE_CHANGED_BIT = 4;
-
     var invalidZErrorLogged = false;
     function logInvalidZError() {
         if (invalidZErrorLogged) {
@@ -2913,2050 +6631,6 @@
         return setTimeout(func, 16);
     };
     var requestAnimationFrame$1 = requestAnimationFrame;
-
-    var easingFuncs = {
-        linear: function (k) {
-            return k;
-        },
-        quadraticIn: function (k) {
-            return k * k;
-        },
-        quadraticOut: function (k) {
-            return k * (2 - k);
-        },
-        quadraticInOut: function (k) {
-            if ((k *= 2) < 1) {
-                return 0.5 * k * k;
-            }
-            return -0.5 * (--k * (k - 2) - 1);
-        },
-        cubicIn: function (k) {
-            return k * k * k;
-        },
-        cubicOut: function (k) {
-            return --k * k * k + 1;
-        },
-        cubicInOut: function (k) {
-            if ((k *= 2) < 1) {
-                return 0.5 * k * k * k;
-            }
-            return 0.5 * ((k -= 2) * k * k + 2);
-        },
-        quarticIn: function (k) {
-            return k * k * k * k;
-        },
-        quarticOut: function (k) {
-            return 1 - (--k * k * k * k);
-        },
-        quarticInOut: function (k) {
-            if ((k *= 2) < 1) {
-                return 0.5 * k * k * k * k;
-            }
-            return -0.5 * ((k -= 2) * k * k * k - 2);
-        },
-        quinticIn: function (k) {
-            return k * k * k * k * k;
-        },
-        quinticOut: function (k) {
-            return --k * k * k * k * k + 1;
-        },
-        quinticInOut: function (k) {
-            if ((k *= 2) < 1) {
-                return 0.5 * k * k * k * k * k;
-            }
-            return 0.5 * ((k -= 2) * k * k * k * k + 2);
-        },
-        sinusoidalIn: function (k) {
-            return 1 - Math.cos(k * Math.PI / 2);
-        },
-        sinusoidalOut: function (k) {
-            return Math.sin(k * Math.PI / 2);
-        },
-        sinusoidalInOut: function (k) {
-            return 0.5 * (1 - Math.cos(Math.PI * k));
-        },
-        exponentialIn: function (k) {
-            return k === 0 ? 0 : Math.pow(1024, k - 1);
-        },
-        exponentialOut: function (k) {
-            return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
-        },
-        exponentialInOut: function (k) {
-            if (k === 0) {
-                return 0;
-            }
-            if (k === 1) {
-                return 1;
-            }
-            if ((k *= 2) < 1) {
-                return 0.5 * Math.pow(1024, k - 1);
-            }
-            return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
-        },
-        circularIn: function (k) {
-            return 1 - Math.sqrt(1 - k * k);
-        },
-        circularOut: function (k) {
-            return Math.sqrt(1 - (--k * k));
-        },
-        circularInOut: function (k) {
-            if ((k *= 2) < 1) {
-                return -0.5 * (Math.sqrt(1 - k * k) - 1);
-            }
-            return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
-        },
-        elasticIn: function (k) {
-            var s;
-            var a = 0.1;
-            var p = 0.4;
-            if (k === 0) {
-                return 0;
-            }
-            if (k === 1) {
-                return 1;
-            }
-            if (!a || a < 1) {
-                a = 1;
-                s = p / 4;
-            }
-            else {
-                s = p * Math.asin(1 / a) / (2 * Math.PI);
-            }
-            return -(a * Math.pow(2, 10 * (k -= 1))
-                * Math.sin((k - s) * (2 * Math.PI) / p));
-        },
-        elasticOut: function (k) {
-            var s;
-            var a = 0.1;
-            var p = 0.4;
-            if (k === 0) {
-                return 0;
-            }
-            if (k === 1) {
-                return 1;
-            }
-            if (!a || a < 1) {
-                a = 1;
-                s = p / 4;
-            }
-            else {
-                s = p * Math.asin(1 / a) / (2 * Math.PI);
-            }
-            return (a * Math.pow(2, -10 * k)
-                * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
-        },
-        elasticInOut: function (k) {
-            var s;
-            var a = 0.1;
-            var p = 0.4;
-            if (k === 0) {
-                return 0;
-            }
-            if (k === 1) {
-                return 1;
-            }
-            if (!a || a < 1) {
-                a = 1;
-                s = p / 4;
-            }
-            else {
-                s = p * Math.asin(1 / a) / (2 * Math.PI);
-            }
-            if ((k *= 2) < 1) {
-                return -0.5 * (a * Math.pow(2, 10 * (k -= 1))
-                    * Math.sin((k - s) * (2 * Math.PI) / p));
-            }
-            return a * Math.pow(2, -10 * (k -= 1))
-                * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
-        },
-        backIn: function (k) {
-            var s = 1.70158;
-            return k * k * ((s + 1) * k - s);
-        },
-        backOut: function (k) {
-            var s = 1.70158;
-            return --k * k * ((s + 1) * k + s) + 1;
-        },
-        backInOut: function (k) {
-            var s = 1.70158 * 1.525;
-            if ((k *= 2) < 1) {
-                return 0.5 * (k * k * ((s + 1) * k - s));
-            }
-            return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-        },
-        bounceIn: function (k) {
-            return 1 - easingFuncs.bounceOut(1 - k);
-        },
-        bounceOut: function (k) {
-            if (k < (1 / 2.75)) {
-                return 7.5625 * k * k;
-            }
-            else if (k < (2 / 2.75)) {
-                return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
-            }
-            else if (k < (2.5 / 2.75)) {
-                return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
-            }
-            else {
-                return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
-            }
-        },
-        bounceInOut: function (k) {
-            if (k < 0.5) {
-                return easingFuncs.bounceIn(k * 2) * 0.5;
-            }
-            return easingFuncs.bounceOut(k * 2 - 1) * 0.5 + 0.5;
-        }
-    };
-
-    var mathPow = Math.pow;
-    var mathSqrt = Math.sqrt;
-    var EPSILON = 1e-8;
-    var EPSILON_NUMERIC = 1e-4;
-    var THREE_SQRT = mathSqrt(3);
-    var ONE_THIRD = 1 / 3;
-    var _v0 = create();
-    var _v1 = create();
-    var _v2 = create();
-    function isAroundZero(val) {
-        return val > -EPSILON && val < EPSILON;
-    }
-    function isNotAroundZero(val) {
-        return val > EPSILON || val < -EPSILON;
-    }
-    function cubicAt(p0, p1, p2, p3, t) {
-        var onet = 1 - t;
-        return onet * onet * (onet * p0 + 3 * t * p1)
-            + t * t * (t * p3 + 3 * onet * p2);
-    }
-    function cubicDerivativeAt(p0, p1, p2, p3, t) {
-        var onet = 1 - t;
-        return 3 * (((p1 - p0) * onet + 2 * (p2 - p1) * t) * onet
-            + (p3 - p2) * t * t);
-    }
-    function cubicRootAt(p0, p1, p2, p3, val, roots) {
-        var a = p3 + 3 * (p1 - p2) - p0;
-        var b = 3 * (p2 - p1 * 2 + p0);
-        var c = 3 * (p1 - p0);
-        var d = p0 - val;
-        var A = b * b - 3 * a * c;
-        var B = b * c - 9 * a * d;
-        var C = c * c - 3 * b * d;
-        var n = 0;
-        if (isAroundZero(A) && isAroundZero(B)) {
-            if (isAroundZero(b)) {
-                roots[0] = 0;
-            }
-            else {
-                var t1 = -c / b;
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-            }
-        }
-        else {
-            var disc = B * B - 4 * A * C;
-            if (isAroundZero(disc)) {
-                var K = B / A;
-                var t1 = -b / a + K;
-                var t2 = -K / 2;
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-                if (t2 >= 0 && t2 <= 1) {
-                    roots[n++] = t2;
-                }
-            }
-            else if (disc > 0) {
-                var discSqrt = mathSqrt(disc);
-                var Y1 = A * b + 1.5 * a * (-B + discSqrt);
-                var Y2 = A * b + 1.5 * a * (-B - discSqrt);
-                if (Y1 < 0) {
-                    Y1 = -mathPow(-Y1, ONE_THIRD);
-                }
-                else {
-                    Y1 = mathPow(Y1, ONE_THIRD);
-                }
-                if (Y2 < 0) {
-                    Y2 = -mathPow(-Y2, ONE_THIRD);
-                }
-                else {
-                    Y2 = mathPow(Y2, ONE_THIRD);
-                }
-                var t1 = (-b - (Y1 + Y2)) / (3 * a);
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-            }
-            else {
-                var T = (2 * A * b - 3 * a * B) / (2 * mathSqrt(A * A * A));
-                var theta = Math.acos(T) / 3;
-                var ASqrt = mathSqrt(A);
-                var tmp = Math.cos(theta);
-                var t1 = (-b - 2 * ASqrt * tmp) / (3 * a);
-                var t2 = (-b + ASqrt * (tmp + THREE_SQRT * Math.sin(theta))) / (3 * a);
-                var t3 = (-b + ASqrt * (tmp - THREE_SQRT * Math.sin(theta))) / (3 * a);
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-                if (t2 >= 0 && t2 <= 1) {
-                    roots[n++] = t2;
-                }
-                if (t3 >= 0 && t3 <= 1) {
-                    roots[n++] = t3;
-                }
-            }
-        }
-        return n;
-    }
-    function cubicExtrema(p0, p1, p2, p3, extrema) {
-        var b = 6 * p2 - 12 * p1 + 6 * p0;
-        var a = 9 * p1 + 3 * p3 - 3 * p0 - 9 * p2;
-        var c = 3 * p1 - 3 * p0;
-        var n = 0;
-        if (isAroundZero(a)) {
-            if (isNotAroundZero(b)) {
-                var t1 = -c / b;
-                if (t1 >= 0 && t1 <= 1) {
-                    extrema[n++] = t1;
-                }
-            }
-        }
-        else {
-            var disc = b * b - 4 * a * c;
-            if (isAroundZero(disc)) {
-                extrema[0] = -b / (2 * a);
-            }
-            else if (disc > 0) {
-                var discSqrt = mathSqrt(disc);
-                var t1 = (-b + discSqrt) / (2 * a);
-                var t2 = (-b - discSqrt) / (2 * a);
-                if (t1 >= 0 && t1 <= 1) {
-                    extrema[n++] = t1;
-                }
-                if (t2 >= 0 && t2 <= 1) {
-                    extrema[n++] = t2;
-                }
-            }
-        }
-        return n;
-    }
-    function cubicSubdivide(p0, p1, p2, p3, t, out) {
-        var p01 = (p1 - p0) * t + p0;
-        var p12 = (p2 - p1) * t + p1;
-        var p23 = (p3 - p2) * t + p2;
-        var p012 = (p12 - p01) * t + p01;
-        var p123 = (p23 - p12) * t + p12;
-        var p0123 = (p123 - p012) * t + p012;
-        out[0] = p0;
-        out[1] = p01;
-        out[2] = p012;
-        out[3] = p0123;
-        out[4] = p0123;
-        out[5] = p123;
-        out[6] = p23;
-        out[7] = p3;
-    }
-    function cubicProjectPoint(x0, y0, x1, y1, x2, y2, x3, y3, x, y, out) {
-        var t;
-        var interval = 0.005;
-        var d = Infinity;
-        var prev;
-        var next;
-        var d1;
-        var d2;
-        _v0[0] = x;
-        _v0[1] = y;
-        for (var _t = 0; _t < 1; _t += 0.05) {
-            _v1[0] = cubicAt(x0, x1, x2, x3, _t);
-            _v1[1] = cubicAt(y0, y1, y2, y3, _t);
-            d1 = distSquare(_v0, _v1);
-            if (d1 < d) {
-                t = _t;
-                d = d1;
-            }
-        }
-        d = Infinity;
-        for (var i = 0; i < 32; i++) {
-            if (interval < EPSILON_NUMERIC) {
-                break;
-            }
-            prev = t - interval;
-            next = t + interval;
-            _v1[0] = cubicAt(x0, x1, x2, x3, prev);
-            _v1[1] = cubicAt(y0, y1, y2, y3, prev);
-            d1 = distSquare(_v1, _v0);
-            if (prev >= 0 && d1 < d) {
-                t = prev;
-                d = d1;
-            }
-            else {
-                _v2[0] = cubicAt(x0, x1, x2, x3, next);
-                _v2[1] = cubicAt(y0, y1, y2, y3, next);
-                d2 = distSquare(_v2, _v0);
-                if (next <= 1 && d2 < d) {
-                    t = next;
-                    d = d2;
-                }
-                else {
-                    interval *= 0.5;
-                }
-            }
-        }
-        if (out) {
-            out[0] = cubicAt(x0, x1, x2, x3, t);
-            out[1] = cubicAt(y0, y1, y2, y3, t);
-        }
-        return mathSqrt(d);
-    }
-    function cubicLength(x0, y0, x1, y1, x2, y2, x3, y3, iteration) {
-        var px = x0;
-        var py = y0;
-        var d = 0;
-        var step = 1 / iteration;
-        for (var i = 1; i <= iteration; i++) {
-            var t = i * step;
-            var x = cubicAt(x0, x1, x2, x3, t);
-            var y = cubicAt(y0, y1, y2, y3, t);
-            var dx = x - px;
-            var dy = y - py;
-            d += Math.sqrt(dx * dx + dy * dy);
-            px = x;
-            py = y;
-        }
-        return d;
-    }
-    function quadraticAt(p0, p1, p2, t) {
-        var onet = 1 - t;
-        return onet * (onet * p0 + 2 * t * p1) + t * t * p2;
-    }
-    function quadraticDerivativeAt(p0, p1, p2, t) {
-        return 2 * ((1 - t) * (p1 - p0) + t * (p2 - p1));
-    }
-    function quadraticRootAt(p0, p1, p2, val, roots) {
-        var a = p0 - 2 * p1 + p2;
-        var b = 2 * (p1 - p0);
-        var c = p0 - val;
-        var n = 0;
-        if (isAroundZero(a)) {
-            if (isNotAroundZero(b)) {
-                var t1 = -c / b;
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-            }
-        }
-        else {
-            var disc = b * b - 4 * a * c;
-            if (isAroundZero(disc)) {
-                var t1 = -b / (2 * a);
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-            }
-            else if (disc > 0) {
-                var discSqrt = mathSqrt(disc);
-                var t1 = (-b + discSqrt) / (2 * a);
-                var t2 = (-b - discSqrt) / (2 * a);
-                if (t1 >= 0 && t1 <= 1) {
-                    roots[n++] = t1;
-                }
-                if (t2 >= 0 && t2 <= 1) {
-                    roots[n++] = t2;
-                }
-            }
-        }
-        return n;
-    }
-    function quadraticExtremum(p0, p1, p2) {
-        var divider = p0 + p2 - 2 * p1;
-        if (divider === 0) {
-            return 0.5;
-        }
-        else {
-            return (p0 - p1) / divider;
-        }
-    }
-    function quadraticSubdivide(p0, p1, p2, t, out) {
-        var p01 = (p1 - p0) * t + p0;
-        var p12 = (p2 - p1) * t + p1;
-        var p012 = (p12 - p01) * t + p01;
-        out[0] = p0;
-        out[1] = p01;
-        out[2] = p012;
-        out[3] = p012;
-        out[4] = p12;
-        out[5] = p2;
-    }
-    function quadraticProjectPoint(x0, y0, x1, y1, x2, y2, x, y, out) {
-        var t;
-        var interval = 0.005;
-        var d = Infinity;
-        _v0[0] = x;
-        _v0[1] = y;
-        for (var _t = 0; _t < 1; _t += 0.05) {
-            _v1[0] = quadraticAt(x0, x1, x2, _t);
-            _v1[1] = quadraticAt(y0, y1, y2, _t);
-            var d1 = distSquare(_v0, _v1);
-            if (d1 < d) {
-                t = _t;
-                d = d1;
-            }
-        }
-        d = Infinity;
-        for (var i = 0; i < 32; i++) {
-            if (interval < EPSILON_NUMERIC) {
-                break;
-            }
-            var prev = t - interval;
-            var next = t + interval;
-            _v1[0] = quadraticAt(x0, x1, x2, prev);
-            _v1[1] = quadraticAt(y0, y1, y2, prev);
-            var d1 = distSquare(_v1, _v0);
-            if (prev >= 0 && d1 < d) {
-                t = prev;
-                d = d1;
-            }
-            else {
-                _v2[0] = quadraticAt(x0, x1, x2, next);
-                _v2[1] = quadraticAt(y0, y1, y2, next);
-                var d2 = distSquare(_v2, _v0);
-                if (next <= 1 && d2 < d) {
-                    t = next;
-                    d = d2;
-                }
-                else {
-                    interval *= 0.5;
-                }
-            }
-        }
-        if (out) {
-            out[0] = quadraticAt(x0, x1, x2, t);
-            out[1] = quadraticAt(y0, y1, y2, t);
-        }
-        return mathSqrt(d);
-    }
-    function quadraticLength(x0, y0, x1, y1, x2, y2, iteration) {
-        var px = x0;
-        var py = y0;
-        var d = 0;
-        var step = 1 / iteration;
-        for (var i = 1; i <= iteration; i++) {
-            var t = i * step;
-            var x = quadraticAt(x0, x1, x2, t);
-            var y = quadraticAt(y0, y1, y2, t);
-            var dx = x - px;
-            var dy = y - py;
-            d += Math.sqrt(dx * dx + dy * dy);
-            px = x;
-            py = y;
-        }
-        return d;
-    }
-
-    var regexp = /cubic-bezier\(([0-9,\.e ]+)\)/;
-    function createCubicEasingFunc(cubicEasingStr) {
-        var cubic = cubicEasingStr && regexp.exec(cubicEasingStr);
-        if (cubic) {
-            var points = cubic[1].split(',');
-            var a_1 = +trim(points[0]);
-            var b_1 = +trim(points[1]);
-            var c_1 = +trim(points[2]);
-            var d_1 = +trim(points[3]);
-            if (isNaN(a_1 + b_1 + c_1 + d_1)) {
-                return;
-            }
-            var roots_1 = [];
-            return function (p) {
-                return p <= 0
-                    ? 0 : p >= 1
-                    ? 1
-                    : cubicRootAt(0, a_1, c_1, 1, p, roots_1) && cubicAt(0, b_1, d_1, 1, roots_1[0]);
-            };
-        }
-    }
-
-    var Clip = (function () {
-        function Clip(opts) {
-            this._inited = false;
-            this._startTime = 0;
-            this._pausedTime = 0;
-            this._paused = false;
-            this._life = opts.life || 1000;
-            this._delay = opts.delay || 0;
-            this.loop = opts.loop || false;
-            this.onframe = opts.onframe || noop;
-            this.ondestroy = opts.ondestroy || noop;
-            this.onrestart = opts.onrestart || noop;
-            opts.easing && this.setEasing(opts.easing);
-        }
-        Clip.prototype.step = function (globalTime, deltaTime) {
-            if (!this._inited) {
-                this._startTime = globalTime + this._delay;
-                this._inited = true;
-            }
-            if (this._paused) {
-                this._pausedTime += deltaTime;
-                return;
-            }
-            var life = this._life;
-            var elapsedTime = globalTime - this._startTime - this._pausedTime;
-            var percent = elapsedTime / life;
-            if (percent < 0) {
-                percent = 0;
-            }
-            percent = Math.min(percent, 1);
-            var easingFunc = this.easingFunc;
-            var schedule = easingFunc ? easingFunc(percent) : percent;
-            this.onframe(schedule);
-            if (percent === 1) {
-                if (this.loop) {
-                    var remainder = elapsedTime % life;
-                    this._startTime = globalTime - remainder;
-                    this._pausedTime = 0;
-                    this.onrestart();
-                }
-                else {
-                    return true;
-                }
-            }
-            return false;
-        };
-        Clip.prototype.pause = function () {
-            this._paused = true;
-        };
-        Clip.prototype.resume = function () {
-            this._paused = false;
-        };
-        Clip.prototype.setEasing = function (easing) {
-            this.easing = easing;
-            this.easingFunc = isFunction(easing)
-                ? easing
-                : easingFuncs[easing] || createCubicEasingFunc(easing);
-        };
-        return Clip;
-    }());
-
-    var Entry = (function () {
-        function Entry(val) {
-            this.value = val;
-        }
-        return Entry;
-    }());
-    var LinkedList = (function () {
-        function LinkedList() {
-            this._len = 0;
-        }
-        LinkedList.prototype.insert = function (val) {
-            var entry = new Entry(val);
-            this.insertEntry(entry);
-            return entry;
-        };
-        LinkedList.prototype.insertEntry = function (entry) {
-            if (!this.head) {
-                this.head = this.tail = entry;
-            }
-            else {
-                this.tail.next = entry;
-                entry.prev = this.tail;
-                entry.next = null;
-                this.tail = entry;
-            }
-            this._len++;
-        };
-        LinkedList.prototype.remove = function (entry) {
-            var prev = entry.prev;
-            var next = entry.next;
-            if (prev) {
-                prev.next = next;
-            }
-            else {
-                this.head = next;
-            }
-            if (next) {
-                next.prev = prev;
-            }
-            else {
-                this.tail = prev;
-            }
-            entry.next = entry.prev = null;
-            this._len--;
-        };
-        LinkedList.prototype.len = function () {
-            return this._len;
-        };
-        LinkedList.prototype.clear = function () {
-            this.head = this.tail = null;
-            this._len = 0;
-        };
-        return LinkedList;
-    }());
-    var LRU = (function () {
-        function LRU(maxSize) {
-            this._list = new LinkedList();
-            this._maxSize = 10;
-            this._map = {};
-            this._maxSize = maxSize;
-        }
-        LRU.prototype.put = function (key, value) {
-            var list = this._list;
-            var map = this._map;
-            var removed = null;
-            if (map[key] == null) {
-                var len = list.len();
-                var entry = this._lastRemovedEntry;
-                if (len >= this._maxSize && len > 0) {
-                    var leastUsedEntry = list.head;
-                    list.remove(leastUsedEntry);
-                    delete map[leastUsedEntry.key];
-                    removed = leastUsedEntry.value;
-                    this._lastRemovedEntry = leastUsedEntry;
-                }
-                if (entry) {
-                    entry.value = value;
-                }
-                else {
-                    entry = new Entry(value);
-                }
-                entry.key = key;
-                list.insertEntry(entry);
-                map[key] = entry;
-            }
-            return removed;
-        };
-        LRU.prototype.get = function (key) {
-            var entry = this._map[key];
-            var list = this._list;
-            if (entry != null) {
-                if (entry !== list.tail) {
-                    list.remove(entry);
-                    list.insertEntry(entry);
-                }
-                return entry.value;
-            }
-        };
-        LRU.prototype.clear = function () {
-            this._list.clear();
-            this._map = {};
-        };
-        LRU.prototype.len = function () {
-            return this._list.len();
-        };
-        return LRU;
-    }());
-
-    var kCSSColorTable = {
-        'transparent': [0, 0, 0, 0], 'aliceblue': [240, 248, 255, 1],
-        'antiquewhite': [250, 235, 215, 1], 'aqua': [0, 255, 255, 1],
-        'aquamarine': [127, 255, 212, 1], 'azure': [240, 255, 255, 1],
-        'beige': [245, 245, 220, 1], 'bisque': [255, 228, 196, 1],
-        'black': [0, 0, 0, 1], 'blanchedalmond': [255, 235, 205, 1],
-        'blue': [0, 0, 255, 1], 'blueviolet': [138, 43, 226, 1],
-        'brown': [165, 42, 42, 1], 'burlywood': [222, 184, 135, 1],
-        'cadetblue': [95, 158, 160, 1], 'chartreuse': [127, 255, 0, 1],
-        'chocolate': [210, 105, 30, 1], 'coral': [255, 127, 80, 1],
-        'cornflowerblue': [100, 149, 237, 1], 'cornsilk': [255, 248, 220, 1],
-        'crimson': [220, 20, 60, 1], 'cyan': [0, 255, 255, 1],
-        'darkblue': [0, 0, 139, 1], 'darkcyan': [0, 139, 139, 1],
-        'darkgoldenrod': [184, 134, 11, 1], 'darkgray': [169, 169, 169, 1],
-        'darkgreen': [0, 100, 0, 1], 'darkgrey': [169, 169, 169, 1],
-        'darkkhaki': [189, 183, 107, 1], 'darkmagenta': [139, 0, 139, 1],
-        'darkolivegreen': [85, 107, 47, 1], 'darkorange': [255, 140, 0, 1],
-        'darkorchid': [153, 50, 204, 1], 'darkred': [139, 0, 0, 1],
-        'darksalmon': [233, 150, 122, 1], 'darkseagreen': [143, 188, 143, 1],
-        'darkslateblue': [72, 61, 139, 1], 'darkslategray': [47, 79, 79, 1],
-        'darkslategrey': [47, 79, 79, 1], 'darkturquoise': [0, 206, 209, 1],
-        'darkviolet': [148, 0, 211, 1], 'deeppink': [255, 20, 147, 1],
-        'deepskyblue': [0, 191, 255, 1], 'dimgray': [105, 105, 105, 1],
-        'dimgrey': [105, 105, 105, 1], 'dodgerblue': [30, 144, 255, 1],
-        'firebrick': [178, 34, 34, 1], 'floralwhite': [255, 250, 240, 1],
-        'forestgreen': [34, 139, 34, 1], 'fuchsia': [255, 0, 255, 1],
-        'gainsboro': [220, 220, 220, 1], 'ghostwhite': [248, 248, 255, 1],
-        'gold': [255, 215, 0, 1], 'goldenrod': [218, 165, 32, 1],
-        'gray': [128, 128, 128, 1], 'green': [0, 128, 0, 1],
-        'greenyellow': [173, 255, 47, 1], 'grey': [128, 128, 128, 1],
-        'honeydew': [240, 255, 240, 1], 'hotpink': [255, 105, 180, 1],
-        'indianred': [205, 92, 92, 1], 'indigo': [75, 0, 130, 1],
-        'ivory': [255, 255, 240, 1], 'khaki': [240, 230, 140, 1],
-        'lavender': [230, 230, 250, 1], 'lavenderblush': [255, 240, 245, 1],
-        'lawngreen': [124, 252, 0, 1], 'lemonchiffon': [255, 250, 205, 1],
-        'lightblue': [173, 216, 230, 1], 'lightcoral': [240, 128, 128, 1],
-        'lightcyan': [224, 255, 255, 1], 'lightgoldenrodyellow': [250, 250, 210, 1],
-        'lightgray': [211, 211, 211, 1], 'lightgreen': [144, 238, 144, 1],
-        'lightgrey': [211, 211, 211, 1], 'lightpink': [255, 182, 193, 1],
-        'lightsalmon': [255, 160, 122, 1], 'lightseagreen': [32, 178, 170, 1],
-        'lightskyblue': [135, 206, 250, 1], 'lightslategray': [119, 136, 153, 1],
-        'lightslategrey': [119, 136, 153, 1], 'lightsteelblue': [176, 196, 222, 1],
-        'lightyellow': [255, 255, 224, 1], 'lime': [0, 255, 0, 1],
-        'limegreen': [50, 205, 50, 1], 'linen': [250, 240, 230, 1],
-        'magenta': [255, 0, 255, 1], 'maroon': [128, 0, 0, 1],
-        'mediumaquamarine': [102, 205, 170, 1], 'mediumblue': [0, 0, 205, 1],
-        'mediumorchid': [186, 85, 211, 1], 'mediumpurple': [147, 112, 219, 1],
-        'mediumseagreen': [60, 179, 113, 1], 'mediumslateblue': [123, 104, 238, 1],
-        'mediumspringgreen': [0, 250, 154, 1], 'mediumturquoise': [72, 209, 204, 1],
-        'mediumvioletred': [199, 21, 133, 1], 'midnightblue': [25, 25, 112, 1],
-        'mintcream': [245, 255, 250, 1], 'mistyrose': [255, 228, 225, 1],
-        'moccasin': [255, 228, 181, 1], 'navajowhite': [255, 222, 173, 1],
-        'navy': [0, 0, 128, 1], 'oldlace': [253, 245, 230, 1],
-        'olive': [128, 128, 0, 1], 'olivedrab': [107, 142, 35, 1],
-        'orange': [255, 165, 0, 1], 'orangered': [255, 69, 0, 1],
-        'orchid': [218, 112, 214, 1], 'palegoldenrod': [238, 232, 170, 1],
-        'palegreen': [152, 251, 152, 1], 'paleturquoise': [175, 238, 238, 1],
-        'palevioletred': [219, 112, 147, 1], 'papayawhip': [255, 239, 213, 1],
-        'peachpuff': [255, 218, 185, 1], 'peru': [205, 133, 63, 1],
-        'pink': [255, 192, 203, 1], 'plum': [221, 160, 221, 1],
-        'powderblue': [176, 224, 230, 1], 'purple': [128, 0, 128, 1],
-        'red': [255, 0, 0, 1], 'rosybrown': [188, 143, 143, 1],
-        'royalblue': [65, 105, 225, 1], 'saddlebrown': [139, 69, 19, 1],
-        'salmon': [250, 128, 114, 1], 'sandybrown': [244, 164, 96, 1],
-        'seagreen': [46, 139, 87, 1], 'seashell': [255, 245, 238, 1],
-        'sienna': [160, 82, 45, 1], 'silver': [192, 192, 192, 1],
-        'skyblue': [135, 206, 235, 1], 'slateblue': [106, 90, 205, 1],
-        'slategray': [112, 128, 144, 1], 'slategrey': [112, 128, 144, 1],
-        'snow': [255, 250, 250, 1], 'springgreen': [0, 255, 127, 1],
-        'steelblue': [70, 130, 180, 1], 'tan': [210, 180, 140, 1],
-        'teal': [0, 128, 128, 1], 'thistle': [216, 191, 216, 1],
-        'tomato': [255, 99, 71, 1], 'turquoise': [64, 224, 208, 1],
-        'violet': [238, 130, 238, 1], 'wheat': [245, 222, 179, 1],
-        'white': [255, 255, 255, 1], 'whitesmoke': [245, 245, 245, 1],
-        'yellow': [255, 255, 0, 1], 'yellowgreen': [154, 205, 50, 1]
-    };
-    function clampCssByte(i) {
-        i = Math.round(i);
-        return i < 0 ? 0 : i > 255 ? 255 : i;
-    }
-    function clampCssAngle(i) {
-        i = Math.round(i);
-        return i < 0 ? 0 : i > 360 ? 360 : i;
-    }
-    function clampCssFloat(f) {
-        return f < 0 ? 0 : f > 1 ? 1 : f;
-    }
-    function parseCssInt(val) {
-        var str = val;
-        if (str.length && str.charAt(str.length - 1) === '%') {
-            return clampCssByte(parseFloat(str) / 100 * 255);
-        }
-        return clampCssByte(parseInt(str, 10));
-    }
-    function parseCssFloat(val) {
-        var str = val;
-        if (str.length && str.charAt(str.length - 1) === '%') {
-            return clampCssFloat(parseFloat(str) / 100);
-        }
-        return clampCssFloat(parseFloat(str));
-    }
-    function cssHueToRgb(m1, m2, h) {
-        if (h < 0) {
-            h += 1;
-        }
-        else if (h > 1) {
-            h -= 1;
-        }
-        if (h * 6 < 1) {
-            return m1 + (m2 - m1) * h * 6;
-        }
-        if (h * 2 < 1) {
-            return m2;
-        }
-        if (h * 3 < 2) {
-            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
-        }
-        return m1;
-    }
-    function lerpNumber(a, b, p) {
-        return a + (b - a) * p;
-    }
-    function setRgba(out, r, g, b, a) {
-        out[0] = r;
-        out[1] = g;
-        out[2] = b;
-        out[3] = a;
-        return out;
-    }
-    function copyRgba(out, a) {
-        out[0] = a[0];
-        out[1] = a[1];
-        out[2] = a[2];
-        out[3] = a[3];
-        return out;
-    }
-    var colorCache = new LRU(20);
-    var lastRemovedArr = null;
-    function putToCache(colorStr, rgbaArr) {
-        if (lastRemovedArr) {
-            copyRgba(lastRemovedArr, rgbaArr);
-        }
-        lastRemovedArr = colorCache.put(colorStr, lastRemovedArr || (rgbaArr.slice()));
-    }
-    function parse(colorStr, rgbaArr) {
-        if (!colorStr) {
-            return;
-        }
-        rgbaArr = rgbaArr || [];
-        var cached = colorCache.get(colorStr);
-        if (cached) {
-            return copyRgba(rgbaArr, cached);
-        }
-        colorStr = colorStr + '';
-        var str = colorStr.replace(/ /g, '').toLowerCase();
-        if (str in kCSSColorTable) {
-            copyRgba(rgbaArr, kCSSColorTable[str]);
-            putToCache(colorStr, rgbaArr);
-            return rgbaArr;
-        }
-        var strLen = str.length;
-        if (str.charAt(0) === '#') {
-            if (strLen === 4 || strLen === 5) {
-                var iv = parseInt(str.slice(1, 4), 16);
-                if (!(iv >= 0 && iv <= 0xfff)) {
-                    setRgba(rgbaArr, 0, 0, 0, 1);
-                    return;
-                }
-                setRgba(rgbaArr, ((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8), (iv & 0xf0) | ((iv & 0xf0) >> 4), (iv & 0xf) | ((iv & 0xf) << 4), strLen === 5 ? parseInt(str.slice(4), 16) / 0xf : 1);
-                putToCache(colorStr, rgbaArr);
-                return rgbaArr;
-            }
-            else if (strLen === 7 || strLen === 9) {
-                var iv = parseInt(str.slice(1, 7), 16);
-                if (!(iv >= 0 && iv <= 0xffffff)) {
-                    setRgba(rgbaArr, 0, 0, 0, 1);
-                    return;
-                }
-                setRgba(rgbaArr, (iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, strLen === 9 ? parseInt(str.slice(7), 16) / 0xff : 1);
-                putToCache(colorStr, rgbaArr);
-                return rgbaArr;
-            }
-            return;
-        }
-        var op = str.indexOf('(');
-        var ep = str.indexOf(')');
-        if (op !== -1 && ep + 1 === strLen) {
-            var fname = str.substr(0, op);
-            var params = str.substr(op + 1, ep - (op + 1)).split(',');
-            var alpha = 1;
-            switch (fname) {
-                case 'rgba':
-                    if (params.length !== 4) {
-                        return params.length === 3
-                            ? setRgba(rgbaArr, +params[0], +params[1], +params[2], 1)
-                            : setRgba(rgbaArr, 0, 0, 0, 1);
-                    }
-                    alpha = parseCssFloat(params.pop());
-                case 'rgb':
-                    if (params.length >= 3) {
-                        setRgba(rgbaArr, parseCssInt(params[0]), parseCssInt(params[1]), parseCssInt(params[2]), params.length === 3 ? alpha : parseCssFloat(params[3]));
-                        putToCache(colorStr, rgbaArr);
-                        return rgbaArr;
-                    }
-                    else {
-                        setRgba(rgbaArr, 0, 0, 0, 1);
-                        return;
-                    }
-                case 'hsla':
-                    if (params.length !== 4) {
-                        setRgba(rgbaArr, 0, 0, 0, 1);
-                        return;
-                    }
-                    params[3] = parseCssFloat(params[3]);
-                    hsla2rgba(params, rgbaArr);
-                    putToCache(colorStr, rgbaArr);
-                    return rgbaArr;
-                case 'hsl':
-                    if (params.length !== 3) {
-                        setRgba(rgbaArr, 0, 0, 0, 1);
-                        return;
-                    }
-                    hsla2rgba(params, rgbaArr);
-                    putToCache(colorStr, rgbaArr);
-                    return rgbaArr;
-                default:
-                    return;
-            }
-        }
-        setRgba(rgbaArr, 0, 0, 0, 1);
-        return;
-    }
-    function hsla2rgba(hsla, rgba) {
-        var h = (((parseFloat(hsla[0]) % 360) + 360) % 360) / 360;
-        var s = parseCssFloat(hsla[1]);
-        var l = parseCssFloat(hsla[2]);
-        var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
-        var m1 = l * 2 - m2;
-        rgba = rgba || [];
-        setRgba(rgba, clampCssByte(cssHueToRgb(m1, m2, h + 1 / 3) * 255), clampCssByte(cssHueToRgb(m1, m2, h) * 255), clampCssByte(cssHueToRgb(m1, m2, h - 1 / 3) * 255), 1);
-        if (hsla.length === 4) {
-            rgba[3] = hsla[3];
-        }
-        return rgba;
-    }
-    function rgba2hsla(rgba) {
-        if (!rgba) {
-            return;
-        }
-        var R = rgba[0] / 255;
-        var G = rgba[1] / 255;
-        var B = rgba[2] / 255;
-        var vMin = Math.min(R, G, B);
-        var vMax = Math.max(R, G, B);
-        var delta = vMax - vMin;
-        var L = (vMax + vMin) / 2;
-        var H;
-        var S;
-        if (delta === 0) {
-            H = 0;
-            S = 0;
-        }
-        else {
-            if (L < 0.5) {
-                S = delta / (vMax + vMin);
-            }
-            else {
-                S = delta / (2 - vMax - vMin);
-            }
-            var deltaR = (((vMax - R) / 6) + (delta / 2)) / delta;
-            var deltaG = (((vMax - G) / 6) + (delta / 2)) / delta;
-            var deltaB = (((vMax - B) / 6) + (delta / 2)) / delta;
-            if (R === vMax) {
-                H = deltaB - deltaG;
-            }
-            else if (G === vMax) {
-                H = (1 / 3) + deltaR - deltaB;
-            }
-            else if (B === vMax) {
-                H = (2 / 3) + deltaG - deltaR;
-            }
-            if (H < 0) {
-                H += 1;
-            }
-            if (H > 1) {
-                H -= 1;
-            }
-        }
-        var hsla = [H * 360, S, L];
-        if (rgba[3] != null) {
-            hsla.push(rgba[3]);
-        }
-        return hsla;
-    }
-    function lift(color, level) {
-        var colorArr = parse(color);
-        if (colorArr) {
-            for (var i = 0; i < 3; i++) {
-                if (level < 0) {
-                    colorArr[i] = colorArr[i] * (1 - level) | 0;
-                }
-                else {
-                    colorArr[i] = ((255 - colorArr[i]) * level + colorArr[i]) | 0;
-                }
-                if (colorArr[i] > 255) {
-                    colorArr[i] = 255;
-                }
-                else if (colorArr[i] < 0) {
-                    colorArr[i] = 0;
-                }
-            }
-            return stringify(colorArr, colorArr.length === 4 ? 'rgba' : 'rgb');
-        }
-    }
-    function toHex(color) {
-        var colorArr = parse(color);
-        if (colorArr) {
-            return ((1 << 24) + (colorArr[0] << 16) + (colorArr[1] << 8) + (+colorArr[2])).toString(16).slice(1);
-        }
-    }
-    function fastLerp(normalizedValue, colors, out) {
-        if (!(colors && colors.length)
-            || !(normalizedValue >= 0 && normalizedValue <= 1)) {
-            return;
-        }
-        out = out || [];
-        var value = normalizedValue * (colors.length - 1);
-        var leftIndex = Math.floor(value);
-        var rightIndex = Math.ceil(value);
-        var leftColor = colors[leftIndex];
-        var rightColor = colors[rightIndex];
-        var dv = value - leftIndex;
-        out[0] = clampCssByte(lerpNumber(leftColor[0], rightColor[0], dv));
-        out[1] = clampCssByte(lerpNumber(leftColor[1], rightColor[1], dv));
-        out[2] = clampCssByte(lerpNumber(leftColor[2], rightColor[2], dv));
-        out[3] = clampCssFloat(lerpNumber(leftColor[3], rightColor[3], dv));
-        return out;
-    }
-    var fastMapToColor = fastLerp;
-    function lerp$1(normalizedValue, colors, fullOutput) {
-        if (!(colors && colors.length)
-            || !(normalizedValue >= 0 && normalizedValue <= 1)) {
-            return;
-        }
-        var value = normalizedValue * (colors.length - 1);
-        var leftIndex = Math.floor(value);
-        var rightIndex = Math.ceil(value);
-        var leftColor = parse(colors[leftIndex]);
-        var rightColor = parse(colors[rightIndex]);
-        var dv = value - leftIndex;
-        var color = stringify([
-            clampCssByte(lerpNumber(leftColor[0], rightColor[0], dv)),
-            clampCssByte(lerpNumber(leftColor[1], rightColor[1], dv)),
-            clampCssByte(lerpNumber(leftColor[2], rightColor[2], dv)),
-            clampCssFloat(lerpNumber(leftColor[3], rightColor[3], dv))
-        ], 'rgba');
-        return fullOutput
-            ? {
-                color: color,
-                leftIndex: leftIndex,
-                rightIndex: rightIndex,
-                value: value
-            }
-            : color;
-    }
-    var mapToColor = lerp$1;
-    function modifyHSL(color, h, s, l) {
-        var colorArr = parse(color);
-        if (color) {
-            colorArr = rgba2hsla(colorArr);
-            h != null && (colorArr[0] = clampCssAngle(h));
-            s != null && (colorArr[1] = parseCssFloat(s));
-            l != null && (colorArr[2] = parseCssFloat(l));
-            return stringify(hsla2rgba(colorArr), 'rgba');
-        }
-    }
-    function modifyAlpha(color, alpha) {
-        var colorArr = parse(color);
-        if (colorArr && alpha != null) {
-            colorArr[3] = clampCssFloat(alpha);
-            return stringify(colorArr, 'rgba');
-        }
-    }
-    function stringify(arrColor, type) {
-        if (!arrColor || !arrColor.length) {
-            return;
-        }
-        var colorStr = arrColor[0] + ',' + arrColor[1] + ',' + arrColor[2];
-        if (type === 'rgba' || type === 'hsva' || type === 'hsla') {
-            colorStr += ',' + arrColor[3];
-        }
-        return type + '(' + colorStr + ')';
-    }
-    function lum(color, backgroundLum) {
-        var arr = parse(color);
-        return arr
-            ? (0.299 * arr[0] + 0.587 * arr[1] + 0.114 * arr[2]) * arr[3] / 255
-                + (1 - arr[3]) * backgroundLum
-            : 0;
-    }
-    function random() {
-        return stringify([
-            Math.round(Math.random() * 255),
-            Math.round(Math.random() * 255),
-            Math.round(Math.random() * 255)
-        ], 'rgb');
-    }
-    var liftedColorCache = new LRU(100);
-    function liftColor(color) {
-        if (isString(color)) {
-            var liftedColor = liftedColorCache.get(color);
-            if (!liftedColor) {
-                liftedColor = lift(color, -0.1);
-                liftedColorCache.put(color, liftedColor);
-            }
-            return liftedColor;
-        }
-        else if (isGradientObject(color)) {
-            var ret = extend({}, color);
-            ret.colorStops = map(color.colorStops, function (stop) { return ({
-                offset: stop.offset,
-                color: lift(stop.color, -0.1)
-            }); });
-            return ret;
-        }
-        return color;
-    }
-
-    var color = /*#__PURE__*/Object.freeze({
-        __proto__: null,
-        parse: parse,
-        lift: lift,
-        toHex: toHex,
-        fastLerp: fastLerp,
-        fastMapToColor: fastMapToColor,
-        lerp: lerp$1,
-        mapToColor: mapToColor,
-        modifyHSL: modifyHSL,
-        modifyAlpha: modifyAlpha,
-        stringify: stringify,
-        lum: lum,
-        random: random,
-        liftColor: liftColor
-    });
-
-    var mathRound = Math.round;
-    function normalizeColor(color) {
-        var opacity;
-        if (!color || color === 'transparent') {
-            color = 'none';
-        }
-        else if (typeof color === 'string' && color.indexOf('rgba') > -1) {
-            var arr = parse(color);
-            if (arr) {
-                color = 'rgb(' + arr[0] + ',' + arr[1] + ',' + arr[2] + ')';
-                opacity = arr[3];
-            }
-        }
-        return {
-            color: color,
-            opacity: opacity == null ? 1 : opacity
-        };
-    }
-    var EPSILON$1 = 1e-4;
-    function isAroundZero$1(transform) {
-        return transform < EPSILON$1 && transform > -EPSILON$1;
-    }
-    function round3(transform) {
-        return mathRound(transform * 1e3) / 1e3;
-    }
-    function round4(transform) {
-        return mathRound(transform * 1e4) / 1e4;
-    }
-    function getMatrixStr(m) {
-        return 'matrix('
-            + round3(m[0]) + ','
-            + round3(m[1]) + ','
-            + round3(m[2]) + ','
-            + round3(m[3]) + ','
-            + round4(m[4]) + ','
-            + round4(m[5])
-            + ')';
-    }
-    var TEXT_ALIGN_TO_ANCHOR = {
-        left: 'start',
-        right: 'end',
-        center: 'middle',
-        middle: 'middle'
-    };
-    function adjustTextY(y, lineHeight, textBaseline) {
-        if (textBaseline === 'top') {
-            y += lineHeight / 2;
-        }
-        else if (textBaseline === 'bottom') {
-            y -= lineHeight / 2;
-        }
-        return y;
-    }
-    function hasShadow(style) {
-        return style
-            && (style.shadowBlur || style.shadowOffsetX || style.shadowOffsetY);
-    }
-    function getShadowKey(displayable) {
-        var style = displayable.style;
-        var globalScale = displayable.getGlobalScale();
-        return [
-            style.shadowColor,
-            (style.shadowBlur || 0).toFixed(2),
-            (style.shadowOffsetX || 0).toFixed(2),
-            (style.shadowOffsetY || 0).toFixed(2),
-            globalScale[0],
-            globalScale[1]
-        ].join(',');
-    }
-    function isImagePattern(val) {
-        return val && (!!val.image);
-    }
-    function isSVGPattern(val) {
-        return val && (!!val.svgElement);
-    }
-    function isPattern(val) {
-        return isImagePattern(val) || isSVGPattern(val);
-    }
-    function isLinearGradient(val) {
-        return val.type === 'linear';
-    }
-    function isRadialGradient(val) {
-        return val.type === 'radial';
-    }
-    function isGradient(val) {
-        return val && (val.type === 'linear'
-            || val.type === 'radial');
-    }
-    function getIdURL(id) {
-        return "url(#" + id + ")";
-    }
-    function getPathPrecision(el) {
-        var scale = el.getGlobalScale();
-        var size = Math.max(scale[0], scale[1]);
-        return Math.max(Math.ceil(Math.log(size) / Math.log(10)), 1);
-    }
-    function getSRTTransformString(transform) {
-        var x = transform.x || 0;
-        var y = transform.y || 0;
-        var rotation = (transform.rotation || 0) * RADIAN_TO_DEGREE;
-        var scaleX = retrieve2(transform.scaleX, 1);
-        var scaleY = retrieve2(transform.scaleY, 1);
-        var skewX = transform.skewX || 0;
-        var skewY = transform.skewY || 0;
-        var res = [];
-        if (x || y) {
-            res.push("translate(" + x + "px," + y + "px)");
-        }
-        if (rotation) {
-            res.push("rotate(" + rotation + ")");
-        }
-        if (scaleX !== 1 || scaleY !== 1) {
-            res.push("scale(" + scaleX + "," + scaleY + ")");
-        }
-        if (skewX || skewY) {
-            res.push("skew(" + mathRound(skewX * RADIAN_TO_DEGREE) + "deg, " + mathRound(skewY * RADIAN_TO_DEGREE) + "deg)");
-        }
-        return res.join(' ');
-    }
-    var encodeBase64 = (function () {
-        if (env.hasGlobalWindow && isFunction(window.btoa)) {
-            return function (str) {
-                return window.btoa(unescape(encodeURIComponent(str)));
-            };
-        }
-        if (typeof Buffer !== 'undefined') {
-            return function (str) {
-                return Buffer.from(str).toString('base64');
-            };
-        }
-        return function (str) {
-            {
-                logError('Base64 isn\'t natively supported in the current environment.');
-            }
-            return null;
-        };
-    })();
-
-    var arraySlice = Array.prototype.slice;
-    function interpolateNumber(p0, p1, percent) {
-        return (p1 - p0) * percent + p0;
-    }
-    function interpolate1DArray(out, p0, p1, percent) {
-        var len = p0.length;
-        for (var i = 0; i < len; i++) {
-            out[i] = interpolateNumber(p0[i], p1[i], percent);
-        }
-        return out;
-    }
-    function interpolate2DArray(out, p0, p1, percent) {
-        var len = p0.length;
-        var len2 = len && p0[0].length;
-        for (var i = 0; i < len; i++) {
-            if (!out[i]) {
-                out[i] = [];
-            }
-            for (var j = 0; j < len2; j++) {
-                out[i][j] = interpolateNumber(p0[i][j], p1[i][j], percent);
-            }
-        }
-        return out;
-    }
-    function add1DArray(out, p0, p1, sign) {
-        var len = p0.length;
-        for (var i = 0; i < len; i++) {
-            out[i] = p0[i] + p1[i] * sign;
-        }
-        return out;
-    }
-    function add2DArray(out, p0, p1, sign) {
-        var len = p0.length;
-        var len2 = len && p0[0].length;
-        for (var i = 0; i < len; i++) {
-            if (!out[i]) {
-                out[i] = [];
-            }
-            for (var j = 0; j < len2; j++) {
-                out[i][j] = p0[i][j] + p1[i][j] * sign;
-            }
-        }
-        return out;
-    }
-    function fillColorStops(val0, val1) {
-        var len0 = val0.length;
-        var len1 = val1.length;
-        var shorterArr = len0 > len1 ? val1 : val0;
-        var shorterLen = Math.min(len0, len1);
-        var last = shorterArr[shorterLen - 1] || { color: [0, 0, 0, 0], offset: 0 };
-        for (var i = shorterLen; i < Math.max(len0, len1); i++) {
-            shorterArr.push({
-                offset: last.offset,
-                color: last.color.slice()
-            });
-        }
-    }
-    function fillArray(val0, val1, arrDim) {
-        var arr0 = val0;
-        var arr1 = val1;
-        if (!arr0.push || !arr1.push) {
-            return;
-        }
-        var arr0Len = arr0.length;
-        var arr1Len = arr1.length;
-        if (arr0Len !== arr1Len) {
-            var isPreviousLarger = arr0Len > arr1Len;
-            if (isPreviousLarger) {
-                arr0.length = arr1Len;
-            }
-            else {
-                for (var i = arr0Len; i < arr1Len; i++) {
-                    arr0.push(arrDim === 1 ? arr1[i] : arraySlice.call(arr1[i]));
-                }
-            }
-        }
-        var len2 = arr0[0] && arr0[0].length;
-        for (var i = 0; i < arr0.length; i++) {
-            if (arrDim === 1) {
-                if (isNaN(arr0[i])) {
-                    arr0[i] = arr1[i];
-                }
-            }
-            else {
-                for (var j = 0; j < len2; j++) {
-                    if (isNaN(arr0[i][j])) {
-                        arr0[i][j] = arr1[i][j];
-                    }
-                }
-            }
-        }
-    }
-    function cloneValue(value) {
-        if (isArrayLike(value)) {
-            var len = value.length;
-            if (isArrayLike(value[0])) {
-                var ret = [];
-                for (var i = 0; i < len; i++) {
-                    ret.push(arraySlice.call(value[i]));
-                }
-                return ret;
-            }
-            return arraySlice.call(value);
-        }
-        return value;
-    }
-    function rgba2String(rgba) {
-        rgba[0] = Math.floor(rgba[0]) || 0;
-        rgba[1] = Math.floor(rgba[1]) || 0;
-        rgba[2] = Math.floor(rgba[2]) || 0;
-        rgba[3] = rgba[3] == null ? 1 : rgba[3];
-        return 'rgba(' + rgba.join(',') + ')';
-    }
-    function guessArrayDim(value) {
-        return isArrayLike(value && value[0]) ? 2 : 1;
-    }
-    var VALUE_TYPE_NUMBER = 0;
-    var VALUE_TYPE_1D_ARRAY = 1;
-    var VALUE_TYPE_2D_ARRAY = 2;
-    var VALUE_TYPE_COLOR = 3;
-    var VALUE_TYPE_LINEAR_GRADIENT = 4;
-    var VALUE_TYPE_RADIAL_GRADIENT = 5;
-    var VALUE_TYPE_UNKOWN = 6;
-    function isGradientValueType(valType) {
-        return valType === VALUE_TYPE_LINEAR_GRADIENT || valType === VALUE_TYPE_RADIAL_GRADIENT;
-    }
-    function isArrayValueType(valType) {
-        return valType === VALUE_TYPE_1D_ARRAY || valType === VALUE_TYPE_2D_ARRAY;
-    }
-    var tmpRgba = [0, 0, 0, 0];
-    var Track = (function () {
-        function Track(propName) {
-            this.keyframes = [];
-            this.discrete = false;
-            this._invalid = false;
-            this._needsSort = false;
-            this._lastFr = 0;
-            this._lastFrP = 0;
-            this.propName = propName;
-        }
-        Track.prototype.isFinished = function () {
-            return this._finished;
-        };
-        Track.prototype.setFinished = function () {
-            this._finished = true;
-            if (this._additiveTrack) {
-                this._additiveTrack.setFinished();
-            }
-        };
-        Track.prototype.needsAnimate = function () {
-            return this.keyframes.length >= 1;
-        };
-        Track.prototype.getAdditiveTrack = function () {
-            return this._additiveTrack;
-        };
-        Track.prototype.addKeyframe = function (time, rawValue, easing) {
-            this._needsSort = true;
-            var keyframes = this.keyframes;
-            var len = keyframes.length;
-            var discrete = false;
-            var valType = VALUE_TYPE_UNKOWN;
-            var value = rawValue;
-            if (isArrayLike(rawValue)) {
-                var arrayDim = guessArrayDim(rawValue);
-                valType = arrayDim;
-                if (arrayDim === 1 && !isNumber(rawValue[0])
-                    || arrayDim === 2 && !isNumber(rawValue[0][0])) {
-                    discrete = true;
-                }
-            }
-            else {
-                if (isNumber(rawValue) && !eqNaN(rawValue)) {
-                    valType = VALUE_TYPE_NUMBER;
-                }
-                else if (isString(rawValue)) {
-                    if (!isNaN(+rawValue)) {
-                        valType = VALUE_TYPE_NUMBER;
-                    }
-                    else {
-                        var colorArray = parse(rawValue);
-                        if (colorArray) {
-                            value = colorArray;
-                            valType = VALUE_TYPE_COLOR;
-                        }
-                    }
-                }
-                else if (isGradientObject(rawValue)) {
-                    var parsedGradient = extend({}, value);
-                    parsedGradient.colorStops = map(rawValue.colorStops, function (colorStop) { return ({
-                        offset: colorStop.offset,
-                        color: parse(colorStop.color)
-                    }); });
-                    if (isLinearGradient(rawValue)) {
-                        valType = VALUE_TYPE_LINEAR_GRADIENT;
-                    }
-                    else if (isRadialGradient(rawValue)) {
-                        valType = VALUE_TYPE_RADIAL_GRADIENT;
-                    }
-                    value = parsedGradient;
-                }
-            }
-            if (len === 0) {
-                this.valType = valType;
-            }
-            else if (valType !== this.valType || valType === VALUE_TYPE_UNKOWN) {
-                discrete = true;
-            }
-            this.discrete = this.discrete || discrete;
-            var kf = {
-                time: time,
-                value: value,
-                rawValue: rawValue,
-                percent: 0
-            };
-            if (easing) {
-                kf.easing = easing;
-                kf.easingFunc = isFunction(easing)
-                    ? easing
-                    : easingFuncs[easing] || createCubicEasingFunc(easing);
-            }
-            keyframes.push(kf);
-            return kf;
-        };
-        Track.prototype.prepare = function (maxTime, additiveTrack) {
-            var kfs = this.keyframes;
-            if (this._needsSort) {
-                kfs.sort(function (a, b) {
-                    return a.time - b.time;
-                });
-            }
-            var valType = this.valType;
-            var kfsLen = kfs.length;
-            var lastKf = kfs[kfsLen - 1];
-            var isDiscrete = this.discrete;
-            var isArr = isArrayValueType(valType);
-            var isGradient = isGradientValueType(valType);
-            for (var i = 0; i < kfsLen; i++) {
-                var kf = kfs[i];
-                var value = kf.value;
-                var lastValue = lastKf.value;
-                kf.percent = kf.time / maxTime;
-                if (!isDiscrete) {
-                    if (isArr && i !== kfsLen - 1) {
-                        fillArray(value, lastValue, valType);
-                    }
-                    else if (isGradient) {
-                        fillColorStops(value.colorStops, lastValue.colorStops);
-                    }
-                }
-            }
-            if (!isDiscrete
-                && valType !== VALUE_TYPE_RADIAL_GRADIENT
-                && additiveTrack
-                && this.needsAnimate()
-                && additiveTrack.needsAnimate()
-                && valType === additiveTrack.valType
-                && !additiveTrack._finished) {
-                this._additiveTrack = additiveTrack;
-                var startValue = kfs[0].value;
-                for (var i = 0; i < kfsLen; i++) {
-                    if (valType === VALUE_TYPE_NUMBER) {
-                        kfs[i].additiveValue = kfs[i].value - startValue;
-                    }
-                    else if (valType === VALUE_TYPE_COLOR) {
-                        kfs[i].additiveValue =
-                            add1DArray([], kfs[i].value, startValue, -1);
-                    }
-                    else if (isArrayValueType(valType)) {
-                        kfs[i].additiveValue = valType === VALUE_TYPE_1D_ARRAY
-                            ? add1DArray([], kfs[i].value, startValue, -1)
-                            : add2DArray([], kfs[i].value, startValue, -1);
-                    }
-                }
-            }
-        };
-        Track.prototype.step = function (target, percent) {
-            if (this._finished) {
-                return;
-            }
-            if (this._additiveTrack && this._additiveTrack._finished) {
-                this._additiveTrack = null;
-            }
-            var isAdditive = this._additiveTrack != null;
-            var valueKey = isAdditive ? 'additiveValue' : 'value';
-            var valType = this.valType;
-            var keyframes = this.keyframes;
-            var kfsNum = keyframes.length;
-            var propName = this.propName;
-            var isValueColor = valType === VALUE_TYPE_COLOR;
-            var frameIdx;
-            var lastFrame = this._lastFr;
-            var mathMin = Math.min;
-            var frame;
-            var nextFrame;
-            if (kfsNum === 1) {
-                frame = nextFrame = keyframes[0];
-            }
-            else {
-                if (percent < 0) {
-                    frameIdx = 0;
-                }
-                else if (percent < this._lastFrP) {
-                    var start = mathMin(lastFrame + 1, kfsNum - 1);
-                    for (frameIdx = start; frameIdx >= 0; frameIdx--) {
-                        if (keyframes[frameIdx].percent <= percent) {
-                            break;
-                        }
-                    }
-                    frameIdx = mathMin(frameIdx, kfsNum - 2);
-                }
-                else {
-                    for (frameIdx = lastFrame; frameIdx < kfsNum; frameIdx++) {
-                        if (keyframes[frameIdx].percent > percent) {
-                            break;
-                        }
-                    }
-                    frameIdx = mathMin(frameIdx - 1, kfsNum - 2);
-                }
-                nextFrame = keyframes[frameIdx + 1];
-                frame = keyframes[frameIdx];
-            }
-            if (!(frame && nextFrame)) {
-                return;
-            }
-            this._lastFr = frameIdx;
-            this._lastFrP = percent;
-            var interval = (nextFrame.percent - frame.percent);
-            var w = interval === 0 ? 1 : mathMin((percent - frame.percent) / interval, 1);
-            if (nextFrame.easingFunc) {
-                w = nextFrame.easingFunc(w);
-            }
-            var targetArr = isAdditive ? this._additiveValue
-                : (isValueColor ? tmpRgba : target[propName]);
-            if ((isArrayValueType(valType) || isValueColor) && !targetArr) {
-                targetArr = this._additiveValue = [];
-            }
-            if (this.discrete) {
-                target[propName] = w < 1 ? frame.rawValue : nextFrame.rawValue;
-            }
-            else if (isArrayValueType(valType)) {
-                valType === VALUE_TYPE_1D_ARRAY
-                    ? interpolate1DArray(targetArr, frame[valueKey], nextFrame[valueKey], w)
-                    : interpolate2DArray(targetArr, frame[valueKey], nextFrame[valueKey], w);
-            }
-            else if (isGradientValueType(valType)) {
-                var val = frame[valueKey];
-                var nextVal_1 = nextFrame[valueKey];
-                var isLinearGradient_1 = valType === VALUE_TYPE_LINEAR_GRADIENT;
-                target[propName] = {
-                    type: isLinearGradient_1 ? 'linear' : 'radial',
-                    x: interpolateNumber(val.x, nextVal_1.x, w),
-                    y: interpolateNumber(val.y, nextVal_1.y, w),
-                    colorStops: map(val.colorStops, function (colorStop, idx) {
-                        var nextColorStop = nextVal_1.colorStops[idx];
-                        return {
-                            offset: interpolateNumber(colorStop.offset, nextColorStop.offset, w),
-                            color: rgba2String(interpolate1DArray([], colorStop.color, nextColorStop.color, w))
-                        };
-                    }),
-                    global: nextVal_1.global
-                };
-                if (isLinearGradient_1) {
-                    target[propName].x2 = interpolateNumber(val.x2, nextVal_1.x2, w);
-                    target[propName].y2 = interpolateNumber(val.y2, nextVal_1.y2, w);
-                }
-                else {
-                    target[propName].r = interpolateNumber(val.r, nextVal_1.r, w);
-                }
-            }
-            else if (isValueColor) {
-                interpolate1DArray(targetArr, frame[valueKey], nextFrame[valueKey], w);
-                if (!isAdditive) {
-                    target[propName] = rgba2String(targetArr);
-                }
-            }
-            else {
-                var value = interpolateNumber(frame[valueKey], nextFrame[valueKey], w);
-                if (isAdditive) {
-                    this._additiveValue = value;
-                }
-                else {
-                    target[propName] = value;
-                }
-            }
-            if (isAdditive) {
-                this._addToTarget(target);
-            }
-        };
-        Track.prototype._addToTarget = function (target) {
-            var valType = this.valType;
-            var propName = this.propName;
-            var additiveValue = this._additiveValue;
-            if (valType === VALUE_TYPE_NUMBER) {
-                target[propName] = target[propName] + additiveValue;
-            }
-            else if (valType === VALUE_TYPE_COLOR) {
-                parse(target[propName], tmpRgba);
-                add1DArray(tmpRgba, tmpRgba, additiveValue, 1);
-                target[propName] = rgba2String(tmpRgba);
-            }
-            else if (valType === VALUE_TYPE_1D_ARRAY) {
-                add1DArray(target[propName], target[propName], additiveValue, 1);
-            }
-            else if (valType === VALUE_TYPE_2D_ARRAY) {
-                add2DArray(target[propName], target[propName], additiveValue, 1);
-            }
-        };
-        return Track;
-    }());
-    var Animator = (function () {
-        function Animator(target, loop, allowDiscreteAnimation, additiveTo) {
-            this._tracks = {};
-            this._trackKeys = [];
-            this._maxTime = 0;
-            this._started = 0;
-            this._clip = null;
-            this._target = target;
-            this._loop = loop;
-            if (loop && additiveTo) {
-                logError('Can\' use additive animation on looped animation.');
-                return;
-            }
-            this._additiveAnimators = additiveTo;
-            this._allowDiscrete = allowDiscreteAnimation;
-        }
-        Animator.prototype.getMaxTime = function () {
-            return this._maxTime;
-        };
-        Animator.prototype.getDelay = function () {
-            return this._delay;
-        };
-        Animator.prototype.getLoop = function () {
-            return this._loop;
-        };
-        Animator.prototype.getTarget = function () {
-            return this._target;
-        };
-        Animator.prototype.changeTarget = function (target) {
-            this._target = target;
-        };
-        Animator.prototype.when = function (time, props, easing) {
-            return this.whenWithKeys(time, props, keys(props), easing);
-        };
-        Animator.prototype.whenWithKeys = function (time, props, propNames, easing) {
-            var tracks = this._tracks;
-            for (var i = 0; i < propNames.length; i++) {
-                var propName = propNames[i];
-                var track = tracks[propName];
-                if (!track) {
-                    track = tracks[propName] = new Track(propName);
-                    var initialValue = void 0;
-                    var additiveTrack = this._getAdditiveTrack(propName);
-                    if (additiveTrack) {
-                        var addtiveTrackKfs = additiveTrack.keyframes;
-                        var lastFinalKf = addtiveTrackKfs[addtiveTrackKfs.length - 1];
-                        initialValue = lastFinalKf && lastFinalKf.value;
-                        if (additiveTrack.valType === VALUE_TYPE_COLOR && initialValue) {
-                            initialValue = rgba2String(initialValue);
-                        }
-                    }
-                    else {
-                        initialValue = this._target[propName];
-                    }
-                    if (initialValue == null) {
-                        continue;
-                    }
-                    if (time > 0) {
-                        track.addKeyframe(0, cloneValue(initialValue), easing);
-                    }
-                    this._trackKeys.push(propName);
-                }
-                track.addKeyframe(time, cloneValue(props[propName]), easing);
-            }
-            this._maxTime = Math.max(this._maxTime, time);
-            return this;
-        };
-        Animator.prototype.pause = function () {
-            this._clip.pause();
-            this._paused = true;
-        };
-        Animator.prototype.resume = function () {
-            this._clip.resume();
-            this._paused = false;
-        };
-        Animator.prototype.isPaused = function () {
-            return !!this._paused;
-        };
-        Animator.prototype.duration = function (duration) {
-            this._maxTime = duration;
-            this._force = true;
-            return this;
-        };
-        Animator.prototype._doneCallback = function () {
-            this._setTracksFinished();
-            this._clip = null;
-            var doneList = this._doneCbs;
-            if (doneList) {
-                var len = doneList.length;
-                for (var i = 0; i < len; i++) {
-                    doneList[i].call(this);
-                }
-            }
-        };
-        Animator.prototype._abortedCallback = function () {
-            this._setTracksFinished();
-            var animation = this.animation;
-            var abortedList = this._abortedCbs;
-            if (animation) {
-                animation.removeClip(this._clip);
-            }
-            this._clip = null;
-            if (abortedList) {
-                for (var i = 0; i < abortedList.length; i++) {
-                    abortedList[i].call(this);
-                }
-            }
-        };
-        Animator.prototype._setTracksFinished = function () {
-            var tracks = this._tracks;
-            var tracksKeys = this._trackKeys;
-            for (var i = 0; i < tracksKeys.length; i++) {
-                tracks[tracksKeys[i]].setFinished();
-            }
-        };
-        Animator.prototype._getAdditiveTrack = function (trackName) {
-            var additiveTrack;
-            var additiveAnimators = this._additiveAnimators;
-            if (additiveAnimators) {
-                for (var i = 0; i < additiveAnimators.length; i++) {
-                    var track = additiveAnimators[i].getTrack(trackName);
-                    if (track) {
-                        additiveTrack = track;
-                    }
-                }
-            }
-            return additiveTrack;
-        };
-        Animator.prototype.start = function (easing) {
-            if (this._started > 0) {
-                return;
-            }
-            this._started = 1;
-            var self = this;
-            var tracks = [];
-            var maxTime = this._maxTime || 0;
-            for (var i = 0; i < this._trackKeys.length; i++) {
-                var propName = this._trackKeys[i];
-                var track = this._tracks[propName];
-                var additiveTrack = this._getAdditiveTrack(propName);
-                var kfs = track.keyframes;
-                var kfsNum = kfs.length;
-                track.prepare(maxTime, additiveTrack);
-                if (track.needsAnimate()) {
-                    if (!this._allowDiscrete && track.discrete) {
-                        var lastKf = kfs[kfsNum - 1];
-                        if (lastKf) {
-                            self._target[track.propName] = lastKf.rawValue;
-                        }
-                        track.setFinished();
-                    }
-                    else {
-                        tracks.push(track);
-                    }
-                }
-            }
-            if (tracks.length || this._force) {
-                var clip = new Clip({
-                    life: maxTime,
-                    loop: this._loop,
-                    delay: this._delay || 0,
-                    onframe: function (percent) {
-                        self._started = 2;
-                        var additiveAnimators = self._additiveAnimators;
-                        if (additiveAnimators) {
-                            var stillHasAdditiveAnimator = false;
-                            for (var i = 0; i < additiveAnimators.length; i++) {
-                                if (additiveAnimators[i]._clip) {
-                                    stillHasAdditiveAnimator = true;
-                                    break;
-                                }
-                            }
-                            if (!stillHasAdditiveAnimator) {
-                                self._additiveAnimators = null;
-                            }
-                        }
-                        for (var i = 0; i < tracks.length; i++) {
-                            tracks[i].step(self._target, percent);
-                        }
-                        var onframeList = self._onframeCbs;
-                        if (onframeList) {
-                            for (var i = 0; i < onframeList.length; i++) {
-                                onframeList[i](self._target, percent);
-                            }
-                        }
-                    },
-                    ondestroy: function () {
-                        self._doneCallback();
-                    }
-                });
-                this._clip = clip;
-                if (this.animation) {
-                    this.animation.addClip(clip);
-                }
-                if (easing) {
-                    clip.setEasing(easing);
-                }
-            }
-            else {
-                this._doneCallback();
-            }
-            return this;
-        };
-        Animator.prototype.stop = function (forwardToLast) {
-            if (!this._clip) {
-                return;
-            }
-            var clip = this._clip;
-            if (forwardToLast) {
-                clip.onframe(1);
-            }
-            this._abortedCallback();
-        };
-        Animator.prototype.delay = function (time) {
-            this._delay = time;
-            return this;
-        };
-        Animator.prototype.during = function (cb) {
-            if (cb) {
-                if (!this._onframeCbs) {
-                    this._onframeCbs = [];
-                }
-                this._onframeCbs.push(cb);
-            }
-            return this;
-        };
-        Animator.prototype.done = function (cb) {
-            if (cb) {
-                if (!this._doneCbs) {
-                    this._doneCbs = [];
-                }
-                this._doneCbs.push(cb);
-            }
-            return this;
-        };
-        Animator.prototype.aborted = function (cb) {
-            if (cb) {
-                if (!this._abortedCbs) {
-                    this._abortedCbs = [];
-                }
-                this._abortedCbs.push(cb);
-            }
-            return this;
-        };
-        Animator.prototype.getClip = function () {
-            return this._clip;
-        };
-        Animator.prototype.getTrack = function (propName) {
-            return this._tracks[propName];
-        };
-        Animator.prototype.getTracks = function () {
-            var _this = this;
-            return map(this._trackKeys, function (key) { return _this._tracks[key]; });
-        };
-        Animator.prototype.stopTracks = function (propNames, forwardToLast) {
-            if (!propNames.length || !this._clip) {
-                return true;
-            }
-            var tracks = this._tracks;
-            var tracksKeys = this._trackKeys;
-            for (var i = 0; i < propNames.length; i++) {
-                var track = tracks[propNames[i]];
-                if (track && !track.isFinished()) {
-                    if (forwardToLast) {
-                        track.step(this._target, 1);
-                    }
-                    else if (this._started === 1) {
-                        track.step(this._target, 0);
-                    }
-                    track.setFinished();
-                }
-            }
-            var allAborted = true;
-            for (var i = 0; i < tracksKeys.length; i++) {
-                if (!tracks[tracksKeys[i]].isFinished()) {
-                    allAborted = false;
-                    break;
-                }
-            }
-            if (allAborted) {
-                this._abortedCallback();
-            }
-            return allAborted;
-        };
-        Animator.prototype.saveTo = function (target, trackKeys, firstOrLast) {
-            if (!target) {
-                return;
-            }
-            trackKeys = trackKeys || this._trackKeys;
-            for (var i = 0; i < trackKeys.length; i++) {
-                var propName = trackKeys[i];
-                var track = this._tracks[propName];
-                if (!track || track.isFinished()) {
-                    continue;
-                }
-                var kfs = track.keyframes;
-                var kf = kfs[firstOrLast ? 0 : kfs.length - 1];
-                if (kf) {
-                    target[propName] = cloneValue(kf.rawValue);
-                }
-            }
-        };
-        Animator.prototype.__changeFinalValue = function (finalProps, trackKeys) {
-            trackKeys = trackKeys || keys(finalProps);
-            for (var i = 0; i < trackKeys.length; i++) {
-                var propName = trackKeys[i];
-                var track = this._tracks[propName];
-                if (!track) {
-                    continue;
-                }
-                var kfs = track.keyframes;
-                if (kfs.length > 1) {
-                    var lastKf = kfs.pop();
-                    track.addKeyframe(lastKf.time, finalProps[propName]);
-                    track.prepare(this._maxTime, track.getAdditiveTrack());
-                }
-            }
-        };
-        return Animator;
-    }());
 
     function getTime() {
         return new Date().getTime();
@@ -5389,1638 +7063,6 @@
         return HandlerDomProxy;
     }(Eventful));
 
-    var dpr = 1;
-    if (env.hasGlobalWindow) {
-        dpr = Math.max(window.devicePixelRatio
-            || (window.screen && window.screen.deviceXDPI / window.screen.logicalXDPI)
-            || 1, 1);
-    }
-    var devicePixelRatio = dpr;
-    var DARK_MODE_THRESHOLD = 0.4;
-    var DARK_LABEL_COLOR = '#333';
-    var LIGHT_LABEL_COLOR = '#ccc';
-    var LIGHTER_LABEL_COLOR = '#eee';
-
-    var mIdentity = identity;
-    var EPSILON$2 = 5e-5;
-    function isNotAroundZero$1(val) {
-        return val > EPSILON$2 || val < -EPSILON$2;
-    }
-    var scaleTmp = [];
-    var tmpTransform = [];
-    var originTransform = create$1();
-    var abs = Math.abs;
-    var Transformable = (function () {
-        function Transformable() {
-        }
-        Transformable.prototype.getLocalTransform = function (m) {
-            return Transformable.getLocalTransform(this, m);
-        };
-        Transformable.prototype.setPosition = function (arr) {
-            this.x = arr[0];
-            this.y = arr[1];
-        };
-        Transformable.prototype.setScale = function (arr) {
-            this.scaleX = arr[0];
-            this.scaleY = arr[1];
-        };
-        Transformable.prototype.setSkew = function (arr) {
-            this.skewX = arr[0];
-            this.skewY = arr[1];
-        };
-        Transformable.prototype.setOrigin = function (arr) {
-            this.originX = arr[0];
-            this.originY = arr[1];
-        };
-        Transformable.prototype.needLocalTransform = function () {
-            return isNotAroundZero$1(this.rotation)
-                || isNotAroundZero$1(this.x)
-                || isNotAroundZero$1(this.y)
-                || isNotAroundZero$1(this.scaleX - 1)
-                || isNotAroundZero$1(this.scaleY - 1)
-                || isNotAroundZero$1(this.skewX)
-                || isNotAroundZero$1(this.skewY);
-        };
-        Transformable.prototype.updateTransform = function () {
-            var parentTransform = this.parent && this.parent.transform;
-            var needLocalTransform = this.needLocalTransform();
-            var m = this.transform;
-            if (!(needLocalTransform || parentTransform)) {
-                if (m) {
-                    mIdentity(m);
-                    this.invTransform = null;
-                }
-                return;
-            }
-            m = m || create$1();
-            if (needLocalTransform) {
-                this.getLocalTransform(m);
-            }
-            else {
-                mIdentity(m);
-            }
-            if (parentTransform) {
-                if (needLocalTransform) {
-                    mul$1(m, parentTransform, m);
-                }
-                else {
-                    copy$1(m, parentTransform);
-                }
-            }
-            this.transform = m;
-            this._resolveGlobalScaleRatio(m);
-        };
-        Transformable.prototype._resolveGlobalScaleRatio = function (m) {
-            var globalScaleRatio = this.globalScaleRatio;
-            if (globalScaleRatio != null && globalScaleRatio !== 1) {
-                this.getGlobalScale(scaleTmp);
-                var relX = scaleTmp[0] < 0 ? -1 : 1;
-                var relY = scaleTmp[1] < 0 ? -1 : 1;
-                var sx = ((scaleTmp[0] - relX) * globalScaleRatio + relX) / scaleTmp[0] || 0;
-                var sy = ((scaleTmp[1] - relY) * globalScaleRatio + relY) / scaleTmp[1] || 0;
-                m[0] *= sx;
-                m[1] *= sx;
-                m[2] *= sy;
-                m[3] *= sy;
-            }
-            this.invTransform = this.invTransform || create$1();
-            invert(this.invTransform, m);
-        };
-        Transformable.prototype.getComputedTransform = function () {
-            var transformNode = this;
-            var ancestors = [];
-            while (transformNode) {
-                ancestors.push(transformNode);
-                transformNode = transformNode.parent;
-            }
-            while (transformNode = ancestors.pop()) {
-                transformNode.updateTransform();
-            }
-            return this.transform;
-        };
-        Transformable.prototype.setLocalTransform = function (m) {
-            if (!m) {
-                return;
-            }
-            var sx = m[0] * m[0] + m[1] * m[1];
-            var sy = m[2] * m[2] + m[3] * m[3];
-            var rotation = Math.atan2(m[1], m[0]);
-            var shearX = Math.PI / 2 + rotation - Math.atan2(m[3], m[2]);
-            sy = Math.sqrt(sy) * Math.cos(shearX);
-            sx = Math.sqrt(sx);
-            this.skewX = shearX;
-            this.skewY = 0;
-            this.rotation = -rotation;
-            this.x = +m[4];
-            this.y = +m[5];
-            this.scaleX = sx;
-            this.scaleY = sy;
-            this.originX = 0;
-            this.originY = 0;
-        };
-        Transformable.prototype.decomposeTransform = function () {
-            if (!this.transform) {
-                return;
-            }
-            var parent = this.parent;
-            var m = this.transform;
-            if (parent && parent.transform) {
-                parent.invTransform = parent.invTransform || create$1();
-                mul$1(tmpTransform, parent.invTransform, m);
-                m = tmpTransform;
-            }
-            var ox = this.originX;
-            var oy = this.originY;
-            if (ox || oy) {
-                originTransform[4] = ox;
-                originTransform[5] = oy;
-                mul$1(tmpTransform, m, originTransform);
-                tmpTransform[4] -= ox;
-                tmpTransform[5] -= oy;
-                m = tmpTransform;
-            }
-            this.setLocalTransform(m);
-        };
-        Transformable.prototype.getGlobalScale = function (out) {
-            var m = this.transform;
-            out = out || [];
-            if (!m) {
-                out[0] = 1;
-                out[1] = 1;
-                return out;
-            }
-            out[0] = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
-            out[1] = Math.sqrt(m[2] * m[2] + m[3] * m[3]);
-            if (m[0] < 0) {
-                out[0] = -out[0];
-            }
-            if (m[3] < 0) {
-                out[1] = -out[1];
-            }
-            return out;
-        };
-        Transformable.prototype.transformCoordToLocal = function (x, y) {
-            var v2 = [x, y];
-            var invTransform = this.invTransform;
-            if (invTransform) {
-                applyTransform(v2, v2, invTransform);
-            }
-            return v2;
-        };
-        Transformable.prototype.transformCoordToGlobal = function (x, y) {
-            var v2 = [x, y];
-            var transform = this.transform;
-            if (transform) {
-                applyTransform(v2, v2, transform);
-            }
-            return v2;
-        };
-        Transformable.prototype.getLineScale = function () {
-            var m = this.transform;
-            return m && abs(m[0] - 1) > 1e-10 && abs(m[3] - 1) > 1e-10
-                ? Math.sqrt(abs(m[0] * m[3] - m[2] * m[1]))
-                : 1;
-        };
-        Transformable.prototype.copyTransform = function (source) {
-            copyTransform(this, source);
-        };
-        Transformable.getLocalTransform = function (target, m) {
-            m = m || [];
-            var ox = target.originX || 0;
-            var oy = target.originY || 0;
-            var sx = target.scaleX;
-            var sy = target.scaleY;
-            var ax = target.anchorX;
-            var ay = target.anchorY;
-            var rotation = target.rotation || 0;
-            var x = target.x;
-            var y = target.y;
-            var skewX = target.skewX ? Math.tan(target.skewX) : 0;
-            var skewY = target.skewY ? Math.tan(-target.skewY) : 0;
-            if (ox || oy || ax || ay) {
-                var dx = ox + ax;
-                var dy = oy + ay;
-                m[4] = -dx * sx - skewX * dy * sy;
-                m[5] = -dy * sy - skewY * dx * sx;
-            }
-            else {
-                m[4] = m[5] = 0;
-            }
-            m[0] = sx;
-            m[3] = sy;
-            m[1] = skewY * sx;
-            m[2] = skewX * sy;
-            rotation && rotate(m, m, rotation);
-            m[4] += ox + x;
-            m[5] += oy + y;
-            return m;
-        };
-        Transformable.initDefaultProps = (function () {
-            var proto = Transformable.prototype;
-            proto.scaleX =
-                proto.scaleY =
-                    proto.globalScaleRatio = 1;
-            proto.x =
-                proto.y =
-                    proto.originX =
-                        proto.originY =
-                            proto.skewX =
-                                proto.skewY =
-                                    proto.rotation =
-                                        proto.anchorX =
-                                            proto.anchorY = 0;
-        })();
-        return Transformable;
-    }());
-    var TRANSFORMABLE_PROPS = [
-        'x', 'y', 'originX', 'originY', 'anchorX', 'anchorY', 'rotation', 'scaleX', 'scaleY', 'skewX', 'skewY'
-    ];
-    function copyTransform(target, source) {
-        for (var i = 0; i < TRANSFORMABLE_PROPS.length; i++) {
-            var propName = TRANSFORMABLE_PROPS[i];
-            target[propName] = source[propName];
-        }
-    }
-
-    var textWidthCache = {};
-    function getWidth(text, font) {
-        font = font || DEFAULT_FONT;
-        var cacheOfFont = textWidthCache[font];
-        if (!cacheOfFont) {
-            cacheOfFont = textWidthCache[font] = new LRU(500);
-        }
-        var width = cacheOfFont.get(text);
-        if (width == null) {
-            width = platformApi.measureText(text, font).width;
-            cacheOfFont.put(text, width);
-        }
-        return width;
-    }
-    function innerGetBoundingRect(text, font, textAlign, textBaseline) {
-        var width = getWidth(text, font);
-        var height = getLineHeight(font);
-        var x = adjustTextX(0, width, textAlign);
-        var y = adjustTextY$1(0, height, textBaseline);
-        var rect = new BoundingRect(x, y, width, height);
-        return rect;
-    }
-    function getBoundingRect(text, font, textAlign, textBaseline) {
-        var textLines = ((text || '') + '').split('\n');
-        var len = textLines.length;
-        if (len === 1) {
-            return innerGetBoundingRect(textLines[0], font, textAlign, textBaseline);
-        }
-        else {
-            var uniondRect = new BoundingRect(0, 0, 0, 0);
-            for (var i = 0; i < textLines.length; i++) {
-                var rect = innerGetBoundingRect(textLines[i], font, textAlign, textBaseline);
-                i === 0 ? uniondRect.copy(rect) : uniondRect.union(rect);
-            }
-            return uniondRect;
-        }
-    }
-    function adjustTextX(x, width, textAlign) {
-        if (textAlign === 'right') {
-            x -= width;
-        }
-        else if (textAlign === 'center') {
-            x -= width / 2;
-        }
-        return x;
-    }
-    function adjustTextY$1(y, height, verticalAlign) {
-        if (verticalAlign === 'middle') {
-            y -= height / 2;
-        }
-        else if (verticalAlign === 'bottom') {
-            y -= height;
-        }
-        return y;
-    }
-    function getLineHeight(font) {
-        return getWidth('国', font);
-    }
-    function parsePercent(value, maxValue) {
-        if (typeof value === 'string') {
-            if (value.lastIndexOf('%') >= 0) {
-                return parseFloat(value) / 100 * maxValue;
-            }
-            return parseFloat(value);
-        }
-        return value;
-    }
-    function calculateTextPosition(out, opts, rect) {
-        var textPosition = opts.position || 'inside';
-        var distance = opts.distance != null ? opts.distance : 5;
-        var height = rect.height;
-        var width = rect.width;
-        var halfHeight = height / 2;
-        var x = rect.x;
-        var y = rect.y;
-        var textAlign = 'left';
-        var textVerticalAlign = 'top';
-        if (textPosition instanceof Array) {
-            x += parsePercent(textPosition[0], rect.width);
-            y += parsePercent(textPosition[1], rect.height);
-            textAlign = null;
-            textVerticalAlign = null;
-        }
-        else {
-            switch (textPosition) {
-                case 'left':
-                    x -= distance;
-                    y += halfHeight;
-                    textAlign = 'right';
-                    textVerticalAlign = 'middle';
-                    break;
-                case 'right':
-                    x += distance + width;
-                    y += halfHeight;
-                    textVerticalAlign = 'middle';
-                    break;
-                case 'top':
-                    x += width / 2;
-                    y -= distance;
-                    textAlign = 'center';
-                    textVerticalAlign = 'bottom';
-                    break;
-                case 'bottom':
-                    x += width / 2;
-                    y += height + distance;
-                    textAlign = 'center';
-                    break;
-                case 'inside':
-                    x += width / 2;
-                    y += halfHeight;
-                    textAlign = 'center';
-                    textVerticalAlign = 'middle';
-                    break;
-                case 'insideLeft':
-                    x += distance;
-                    y += halfHeight;
-                    textVerticalAlign = 'middle';
-                    break;
-                case 'insideRight':
-                    x += width - distance;
-                    y += halfHeight;
-                    textAlign = 'right';
-                    textVerticalAlign = 'middle';
-                    break;
-                case 'insideTop':
-                    x += width / 2;
-                    y += distance;
-                    textAlign = 'center';
-                    break;
-                case 'insideBottom':
-                    x += width / 2;
-                    y += height - distance;
-                    textAlign = 'center';
-                    textVerticalAlign = 'bottom';
-                    break;
-                case 'insideTopLeft':
-                    x += distance;
-                    y += distance;
-                    break;
-                case 'insideTopRight':
-                    x += width - distance;
-                    y += distance;
-                    textAlign = 'right';
-                    break;
-                case 'insideBottomLeft':
-                    x += distance;
-                    y += height - distance;
-                    textVerticalAlign = 'bottom';
-                    break;
-                case 'insideBottomRight':
-                    x += width - distance;
-                    y += height - distance;
-                    textAlign = 'right';
-                    textVerticalAlign = 'bottom';
-                    break;
-            }
-        }
-        out = out || {};
-        out.x = x;
-        out.y = y;
-        out.align = textAlign;
-        out.verticalAlign = textVerticalAlign;
-        return out;
-    }
-
-    var PRESERVED_NORMAL_STATE = '__zr_normal__';
-    var PRIMARY_STATES_KEYS = TRANSFORMABLE_PROPS.concat(['ignore']);
-    var DEFAULT_ANIMATABLE_MAP = reduce(TRANSFORMABLE_PROPS, function (obj, key) {
-        obj[key] = true;
-        return obj;
-    }, { ignore: false });
-    var tmpTextPosCalcRes = {};
-    var tmpBoundingRect = new BoundingRect(0, 0, 0, 0);
-    var Element = (function () {
-        function Element(props) {
-            this.id = guid();
-            this.animators = [];
-            this.currentStates = [];
-            this.states = {};
-            this._init(props);
-        }
-        Element.prototype._init = function (props) {
-            this.attr(props);
-        };
-        Element.prototype.drift = function (dx, dy, e) {
-            switch (this.draggable) {
-                case 'horizontal':
-                    dy = 0;
-                    break;
-                case 'vertical':
-                    dx = 0;
-                    break;
-            }
-            var m = this.transform;
-            if (!m) {
-                m = this.transform = [1, 0, 0, 1, 0, 0];
-            }
-            m[4] += dx;
-            m[5] += dy;
-            this.decomposeTransform();
-            this.markRedraw();
-        };
-        Element.prototype.beforeUpdate = function () { };
-        Element.prototype.afterUpdate = function () { };
-        Element.prototype.update = function () {
-            this.updateTransform();
-            if (this.__dirty) {
-                this.updateInnerText();
-            }
-        };
-        Element.prototype.updateInnerText = function (forceUpdate) {
-            var textEl = this._textContent;
-            if (textEl && (!textEl.ignore || forceUpdate)) {
-                if (!this.textConfig) {
-                    this.textConfig = {};
-                }
-                var textConfig = this.textConfig;
-                var isLocal = textConfig.local;
-                var innerTransformable = textEl.innerTransformable;
-                var textAlign = void 0;
-                var textVerticalAlign = void 0;
-                var textStyleChanged = false;
-                innerTransformable.parent = isLocal ? this : null;
-                var innerOrigin = false;
-                innerTransformable.copyTransform(textEl);
-                if (textConfig.position != null) {
-                    var layoutRect = tmpBoundingRect;
-                    if (textConfig.layoutRect) {
-                        layoutRect.copy(textConfig.layoutRect);
-                    }
-                    else {
-                        layoutRect.copy(this.getBoundingRect());
-                    }
-                    if (!isLocal) {
-                        layoutRect.applyTransform(this.transform);
-                    }
-                    if (this.calculateTextPosition) {
-                        this.calculateTextPosition(tmpTextPosCalcRes, textConfig, layoutRect);
-                    }
-                    else {
-                        calculateTextPosition(tmpTextPosCalcRes, textConfig, layoutRect);
-                    }
-                    innerTransformable.x = tmpTextPosCalcRes.x;
-                    innerTransformable.y = tmpTextPosCalcRes.y;
-                    textAlign = tmpTextPosCalcRes.align;
-                    textVerticalAlign = tmpTextPosCalcRes.verticalAlign;
-                    var textOrigin = textConfig.origin;
-                    if (textOrigin && textConfig.rotation != null) {
-                        var relOriginX = void 0;
-                        var relOriginY = void 0;
-                        if (textOrigin === 'center') {
-                            relOriginX = layoutRect.width * 0.5;
-                            relOriginY = layoutRect.height * 0.5;
-                        }
-                        else {
-                            relOriginX = parsePercent(textOrigin[0], layoutRect.width);
-                            relOriginY = parsePercent(textOrigin[1], layoutRect.height);
-                        }
-                        innerOrigin = true;
-                        innerTransformable.originX = -innerTransformable.x + relOriginX + (isLocal ? 0 : layoutRect.x);
-                        innerTransformable.originY = -innerTransformable.y + relOriginY + (isLocal ? 0 : layoutRect.y);
-                    }
-                }
-                if (textConfig.rotation != null) {
-                    innerTransformable.rotation = textConfig.rotation;
-                }
-                var textOffset = textConfig.offset;
-                if (textOffset) {
-                    innerTransformable.x += textOffset[0];
-                    innerTransformable.y += textOffset[1];
-                    if (!innerOrigin) {
-                        innerTransformable.originX = -textOffset[0];
-                        innerTransformable.originY = -textOffset[1];
-                    }
-                }
-                var isInside = textConfig.inside == null
-                    ? (typeof textConfig.position === 'string' && textConfig.position.indexOf('inside') >= 0)
-                    : textConfig.inside;
-                var innerTextDefaultStyle = this._innerTextDefaultStyle || (this._innerTextDefaultStyle = {});
-                var textFill = void 0;
-                var textStroke = void 0;
-                var autoStroke = void 0;
-                if (isInside && this.canBeInsideText()) {
-                    textFill = textConfig.insideFill;
-                    textStroke = textConfig.insideStroke;
-                    if (textFill == null || textFill === 'auto') {
-                        textFill = this.getInsideTextFill();
-                    }
-                    if (textStroke == null || textStroke === 'auto') {
-                        textStroke = this.getInsideTextStroke(textFill);
-                        autoStroke = true;
-                    }
-                }
-                else {
-                    textFill = textConfig.outsideFill;
-                    textStroke = textConfig.outsideStroke;
-                    if (textFill == null || textFill === 'auto') {
-                        textFill = this.getOutsideFill();
-                    }
-                    if (textStroke == null || textStroke === 'auto') {
-                        textStroke = this.getOutsideStroke(textFill);
-                        autoStroke = true;
-                    }
-                }
-                textFill = textFill || '#000';
-                if (textFill !== innerTextDefaultStyle.fill
-                    || textStroke !== innerTextDefaultStyle.stroke
-                    || autoStroke !== innerTextDefaultStyle.autoStroke
-                    || textAlign !== innerTextDefaultStyle.align
-                    || textVerticalAlign !== innerTextDefaultStyle.verticalAlign) {
-                    textStyleChanged = true;
-                    innerTextDefaultStyle.fill = textFill;
-                    innerTextDefaultStyle.stroke = textStroke;
-                    innerTextDefaultStyle.autoStroke = autoStroke;
-                    innerTextDefaultStyle.align = textAlign;
-                    innerTextDefaultStyle.verticalAlign = textVerticalAlign;
-                    textEl.setDefaultTextStyle(innerTextDefaultStyle);
-                }
-                textEl.__dirty |= REDRAW_BIT;
-                if (textStyleChanged) {
-                    textEl.dirtyStyle(true);
-                }
-            }
-        };
-        Element.prototype.canBeInsideText = function () {
-            return true;
-        };
-        Element.prototype.getInsideTextFill = function () {
-            return '#fff';
-        };
-        Element.prototype.getInsideTextStroke = function (textFill) {
-            return '#000';
-        };
-        Element.prototype.getOutsideFill = function () {
-            return this.__zr && this.__zr.isDarkMode() ? LIGHT_LABEL_COLOR : DARK_LABEL_COLOR;
-        };
-        Element.prototype.getOutsideStroke = function (textFill) {
-            var backgroundColor = this.__zr && this.__zr.getBackgroundColor();
-            var colorArr = typeof backgroundColor === 'string' && parse(backgroundColor);
-            if (!colorArr) {
-                colorArr = [255, 255, 255, 1];
-            }
-            var alpha = colorArr[3];
-            var isDark = this.__zr.isDarkMode();
-            for (var i = 0; i < 3; i++) {
-                colorArr[i] = colorArr[i] * alpha + (isDark ? 0 : 255) * (1 - alpha);
-            }
-            colorArr[3] = 1;
-            return stringify(colorArr, 'rgba');
-        };
-        Element.prototype.traverse = function (cb, context) { };
-        Element.prototype.attrKV = function (key, value) {
-            if (key === 'textConfig') {
-                this.setTextConfig(value);
-            }
-            else if (key === 'textContent') {
-                this.setTextContent(value);
-            }
-            else if (key === 'clipPath') {
-                this.setClipPath(value);
-            }
-            else if (key === 'extra') {
-                this.extra = this.extra || {};
-                extend(this.extra, value);
-            }
-            else {
-                this[key] = value;
-            }
-        };
-        Element.prototype.hide = function () {
-            this.ignore = true;
-            this.markRedraw();
-        };
-        Element.prototype.show = function () {
-            this.ignore = false;
-            this.markRedraw();
-        };
-        Element.prototype.attr = function (keyOrObj, value) {
-            if (typeof keyOrObj === 'string') {
-                this.attrKV(keyOrObj, value);
-            }
-            else if (isObject(keyOrObj)) {
-                var obj = keyOrObj;
-                var keysArr = keys(obj);
-                for (var i = 0; i < keysArr.length; i++) {
-                    var key = keysArr[i];
-                    this.attrKV(key, keyOrObj[key]);
-                }
-            }
-            this.markRedraw();
-            return this;
-        };
-        Element.prototype.saveCurrentToNormalState = function (toState) {
-            this._innerSaveToNormal(toState);
-            var normalState = this._normalState;
-            for (var i = 0; i < this.animators.length; i++) {
-                var animator = this.animators[i];
-                var fromStateTransition = animator.__fromStateTransition;
-                if (animator.getLoop() || fromStateTransition && fromStateTransition !== PRESERVED_NORMAL_STATE) {
-                    continue;
-                }
-                var targetName = animator.targetName;
-                var target = targetName
-                    ? normalState[targetName] : normalState;
-                animator.saveTo(target);
-            }
-        };
-        Element.prototype._innerSaveToNormal = function (toState) {
-            var normalState = this._normalState;
-            if (!normalState) {
-                normalState = this._normalState = {};
-            }
-            if (toState.textConfig && !normalState.textConfig) {
-                normalState.textConfig = this.textConfig;
-            }
-            this._savePrimaryToNormal(toState, normalState, PRIMARY_STATES_KEYS);
-        };
-        Element.prototype._savePrimaryToNormal = function (toState, normalState, primaryKeys) {
-            for (var i = 0; i < primaryKeys.length; i++) {
-                var key = primaryKeys[i];
-                if (toState[key] != null && !(key in normalState)) {
-                    normalState[key] = this[key];
-                }
-            }
-        };
-        Element.prototype.hasState = function () {
-            return this.currentStates.length > 0;
-        };
-        Element.prototype.getState = function (name) {
-            return this.states[name];
-        };
-        Element.prototype.ensureState = function (name) {
-            var states = this.states;
-            if (!states[name]) {
-                states[name] = {};
-            }
-            return states[name];
-        };
-        Element.prototype.clearStates = function (noAnimation) {
-            this.useState(PRESERVED_NORMAL_STATE, false, noAnimation);
-        };
-        Element.prototype.useState = function (stateName, keepCurrentStates, noAnimation, forceUseHoverLayer) {
-            var toNormalState = stateName === PRESERVED_NORMAL_STATE;
-            var hasStates = this.hasState();
-            if (!hasStates && toNormalState) {
-                return;
-            }
-            var currentStates = this.currentStates;
-            var animationCfg = this.stateTransition;
-            if (indexOf(currentStates, stateName) >= 0 && (keepCurrentStates || currentStates.length === 1)) {
-                return;
-            }
-            var state;
-            if (this.stateProxy && !toNormalState) {
-                state = this.stateProxy(stateName);
-            }
-            if (!state) {
-                state = (this.states && this.states[stateName]);
-            }
-            if (!state && !toNormalState) {
-                logError("State " + stateName + " not exists.");
-                return;
-            }
-            if (!toNormalState) {
-                this.saveCurrentToNormalState(state);
-            }
-            var useHoverLayer = !!((state && state.hoverLayer) || forceUseHoverLayer);
-            if (useHoverLayer) {
-                this._toggleHoverLayerFlag(true);
-            }
-            this._applyStateObj(stateName, state, this._normalState, keepCurrentStates, !noAnimation && !this.__inHover && animationCfg && animationCfg.duration > 0, animationCfg);
-            var textContent = this._textContent;
-            var textGuide = this._textGuide;
-            if (textContent) {
-                textContent.useState(stateName, keepCurrentStates, noAnimation, useHoverLayer);
-            }
-            if (textGuide) {
-                textGuide.useState(stateName, keepCurrentStates, noAnimation, useHoverLayer);
-            }
-            if (toNormalState) {
-                this.currentStates = [];
-                this._normalState = {};
-            }
-            else {
-                if (!keepCurrentStates) {
-                    this.currentStates = [stateName];
-                }
-                else {
-                    this.currentStates.push(stateName);
-                }
-            }
-            this._updateAnimationTargets();
-            this.markRedraw();
-            if (!useHoverLayer && this.__inHover) {
-                this._toggleHoverLayerFlag(false);
-                this.__dirty &= ~REDRAW_BIT;
-            }
-            return state;
-        };
-        Element.prototype.useStates = function (states, noAnimation, forceUseHoverLayer) {
-            if (!states.length) {
-                this.clearStates();
-            }
-            else {
-                var stateObjects = [];
-                var currentStates = this.currentStates;
-                var len = states.length;
-                var notChange = len === currentStates.length;
-                if (notChange) {
-                    for (var i = 0; i < len; i++) {
-                        if (states[i] !== currentStates[i]) {
-                            notChange = false;
-                            break;
-                        }
-                    }
-                }
-                if (notChange) {
-                    return;
-                }
-                for (var i = 0; i < len; i++) {
-                    var stateName = states[i];
-                    var stateObj = void 0;
-                    if (this.stateProxy) {
-                        stateObj = this.stateProxy(stateName, states);
-                    }
-                    if (!stateObj) {
-                        stateObj = this.states[stateName];
-                    }
-                    if (stateObj) {
-                        stateObjects.push(stateObj);
-                    }
-                }
-                var lastStateObj = stateObjects[len - 1];
-                var useHoverLayer = !!((lastStateObj && lastStateObj.hoverLayer) || forceUseHoverLayer);
-                if (useHoverLayer) {
-                    this._toggleHoverLayerFlag(true);
-                }
-                var mergedState = this._mergeStates(stateObjects);
-                var animationCfg = this.stateTransition;
-                this.saveCurrentToNormalState(mergedState);
-                this._applyStateObj(states.join(','), mergedState, this._normalState, false, !noAnimation && !this.__inHover && animationCfg && animationCfg.duration > 0, animationCfg);
-                var textContent = this._textContent;
-                var textGuide = this._textGuide;
-                if (textContent) {
-                    textContent.useStates(states, noAnimation, useHoverLayer);
-                }
-                if (textGuide) {
-                    textGuide.useStates(states, noAnimation, useHoverLayer);
-                }
-                this._updateAnimationTargets();
-                this.currentStates = states.slice();
-                this.markRedraw();
-                if (!useHoverLayer && this.__inHover) {
-                    this._toggleHoverLayerFlag(false);
-                    this.__dirty &= ~REDRAW_BIT;
-                }
-            }
-        };
-        Element.prototype.isSilent = function () {
-            var isSilent = this.silent;
-            var ancestor = this.parent;
-            while (!isSilent && ancestor) {
-                if (ancestor.silent) {
-                    isSilent = true;
-                    break;
-                }
-                ancestor = ancestor.parent;
-            }
-            return isSilent;
-        };
-        Element.prototype._updateAnimationTargets = function () {
-            for (var i = 0; i < this.animators.length; i++) {
-                var animator = this.animators[i];
-                if (animator.targetName) {
-                    animator.changeTarget(this[animator.targetName]);
-                }
-            }
-        };
-        Element.prototype.removeState = function (state) {
-            var idx = indexOf(this.currentStates, state);
-            if (idx >= 0) {
-                var currentStates = this.currentStates.slice();
-                currentStates.splice(idx, 1);
-                this.useStates(currentStates);
-            }
-        };
-        Element.prototype.replaceState = function (oldState, newState, forceAdd) {
-            var currentStates = this.currentStates.slice();
-            var idx = indexOf(currentStates, oldState);
-            var newStateExists = indexOf(currentStates, newState) >= 0;
-            if (idx >= 0) {
-                if (!newStateExists) {
-                    currentStates[idx] = newState;
-                }
-                else {
-                    currentStates.splice(idx, 1);
-                }
-            }
-            else if (forceAdd && !newStateExists) {
-                currentStates.push(newState);
-            }
-            this.useStates(currentStates);
-        };
-        Element.prototype.toggleState = function (state, enable) {
-            if (enable) {
-                this.useState(state, true);
-            }
-            else {
-                this.removeState(state);
-            }
-        };
-        Element.prototype._mergeStates = function (states) {
-            var mergedState = {};
-            var mergedTextConfig;
-            for (var i = 0; i < states.length; i++) {
-                var state = states[i];
-                extend(mergedState, state);
-                if (state.textConfig) {
-                    mergedTextConfig = mergedTextConfig || {};
-                    extend(mergedTextConfig, state.textConfig);
-                }
-            }
-            if (mergedTextConfig) {
-                mergedState.textConfig = mergedTextConfig;
-            }
-            return mergedState;
-        };
-        Element.prototype._applyStateObj = function (stateName, state, normalState, keepCurrentStates, transition, animationCfg) {
-            var needsRestoreToNormal = !(state && keepCurrentStates);
-            if (state && state.textConfig) {
-                this.textConfig = extend({}, keepCurrentStates ? this.textConfig : normalState.textConfig);
-                extend(this.textConfig, state.textConfig);
-            }
-            else if (needsRestoreToNormal) {
-                if (normalState.textConfig) {
-                    this.textConfig = normalState.textConfig;
-                }
-            }
-            var transitionTarget = {};
-            var hasTransition = false;
-            for (var i = 0; i < PRIMARY_STATES_KEYS.length; i++) {
-                var key = PRIMARY_STATES_KEYS[i];
-                var propNeedsTransition = transition && DEFAULT_ANIMATABLE_MAP[key];
-                if (state && state[key] != null) {
-                    if (propNeedsTransition) {
-                        hasTransition = true;
-                        transitionTarget[key] = state[key];
-                    }
-                    else {
-                        this[key] = state[key];
-                    }
-                }
-                else if (needsRestoreToNormal) {
-                    if (normalState[key] != null) {
-                        if (propNeedsTransition) {
-                            hasTransition = true;
-                            transitionTarget[key] = normalState[key];
-                        }
-                        else {
-                            this[key] = normalState[key];
-                        }
-                    }
-                }
-            }
-            if (!transition) {
-                for (var i = 0; i < this.animators.length; i++) {
-                    var animator = this.animators[i];
-                    var targetName = animator.targetName;
-                    if (!animator.getLoop()) {
-                        animator.__changeFinalValue(targetName
-                            ? (state || normalState)[targetName]
-                            : (state || normalState));
-                    }
-                }
-            }
-            if (hasTransition) {
-                this._transitionState(stateName, transitionTarget, animationCfg);
-            }
-        };
-        Element.prototype._attachComponent = function (componentEl) {
-            if (componentEl.__zr && !componentEl.__hostTarget) {
-                {
-                    throw new Error('Text element has been added to zrender.');
-                }
-            }
-            if (componentEl === this) {
-                {
-                    throw new Error('Recursive component attachment.');
-                }
-            }
-            var zr = this.__zr;
-            if (zr) {
-                componentEl.addSelfToZr(zr);
-            }
-            componentEl.__zr = zr;
-            componentEl.__hostTarget = this;
-        };
-        Element.prototype._detachComponent = function (componentEl) {
-            if (componentEl.__zr) {
-                componentEl.removeSelfFromZr(componentEl.__zr);
-            }
-            componentEl.__zr = null;
-            componentEl.__hostTarget = null;
-        };
-        Element.prototype.getClipPath = function () {
-            return this._clipPath;
-        };
-        Element.prototype.setClipPath = function (clipPath) {
-            if (this._clipPath && this._clipPath !== clipPath) {
-                this.removeClipPath();
-            }
-            this._attachComponent(clipPath);
-            this._clipPath = clipPath;
-            this.markRedraw();
-        };
-        Element.prototype.removeClipPath = function () {
-            var clipPath = this._clipPath;
-            if (clipPath) {
-                this._detachComponent(clipPath);
-                this._clipPath = null;
-                this.markRedraw();
-            }
-        };
-        Element.prototype.getTextContent = function () {
-            return this._textContent;
-        };
-        Element.prototype.setTextContent = function (textEl) {
-            var previousTextContent = this._textContent;
-            if (previousTextContent === textEl) {
-                return;
-            }
-            if (previousTextContent && previousTextContent !== textEl) {
-                this.removeTextContent();
-            }
-            {
-                if (textEl.__zr && !textEl.__hostTarget) {
-                    throw new Error('Text element has been added to zrender.');
-                }
-            }
-            textEl.innerTransformable = new Transformable();
-            this._attachComponent(textEl);
-            this._textContent = textEl;
-            this.markRedraw();
-        };
-        Element.prototype.setTextConfig = function (cfg) {
-            if (!this.textConfig) {
-                this.textConfig = {};
-            }
-            extend(this.textConfig, cfg);
-            this.markRedraw();
-        };
-        Element.prototype.removeTextConfig = function () {
-            this.textConfig = null;
-            this.markRedraw();
-        };
-        Element.prototype.removeTextContent = function () {
-            var textEl = this._textContent;
-            if (textEl) {
-                textEl.innerTransformable = null;
-                this._detachComponent(textEl);
-                this._textContent = null;
-                this._innerTextDefaultStyle = null;
-                this.markRedraw();
-            }
-        };
-        Element.prototype.getTextGuideLine = function () {
-            return this._textGuide;
-        };
-        Element.prototype.setTextGuideLine = function (guideLine) {
-            if (this._textGuide && this._textGuide !== guideLine) {
-                this.removeTextGuideLine();
-            }
-            this._attachComponent(guideLine);
-            this._textGuide = guideLine;
-            this.markRedraw();
-        };
-        Element.prototype.removeTextGuideLine = function () {
-            var textGuide = this._textGuide;
-            if (textGuide) {
-                this._detachComponent(textGuide);
-                this._textGuide = null;
-                this.markRedraw();
-            }
-        };
-        Element.prototype.markRedraw = function () {
-            this.__dirty |= REDRAW_BIT;
-            var zr = this.__zr;
-            if (zr) {
-                if (this.__inHover) {
-                    zr.refreshHover();
-                }
-                else {
-                    zr.refresh();
-                }
-            }
-            if (this.__hostTarget) {
-                this.__hostTarget.markRedraw();
-            }
-        };
-        Element.prototype.dirty = function () {
-            this.markRedraw();
-        };
-        Element.prototype._toggleHoverLayerFlag = function (inHover) {
-            this.__inHover = inHover;
-            var textContent = this._textContent;
-            var textGuide = this._textGuide;
-            if (textContent) {
-                textContent.__inHover = inHover;
-            }
-            if (textGuide) {
-                textGuide.__inHover = inHover;
-            }
-        };
-        Element.prototype.addSelfToZr = function (zr) {
-            if (this.__zr === zr) {
-                return;
-            }
-            this.__zr = zr;
-            var animators = this.animators;
-            if (animators) {
-                for (var i = 0; i < animators.length; i++) {
-                    zr.animation.addAnimator(animators[i]);
-                }
-            }
-            if (this._clipPath) {
-                this._clipPath.addSelfToZr(zr);
-            }
-            if (this._textContent) {
-                this._textContent.addSelfToZr(zr);
-            }
-            if (this._textGuide) {
-                this._textGuide.addSelfToZr(zr);
-            }
-        };
-        Element.prototype.removeSelfFromZr = function (zr) {
-            if (!this.__zr) {
-                return;
-            }
-            this.__zr = null;
-            var animators = this.animators;
-            if (animators) {
-                for (var i = 0; i < animators.length; i++) {
-                    zr.animation.removeAnimator(animators[i]);
-                }
-            }
-            if (this._clipPath) {
-                this._clipPath.removeSelfFromZr(zr);
-            }
-            if (this._textContent) {
-                this._textContent.removeSelfFromZr(zr);
-            }
-            if (this._textGuide) {
-                this._textGuide.removeSelfFromZr(zr);
-            }
-        };
-        Element.prototype.animate = function (key, loop, allowDiscreteAnimation) {
-            var target = key ? this[key] : this;
-            {
-                if (!target) {
-                    logError('Property "'
-                        + key
-                        + '" is not existed in element '
-                        + this.id);
-                    return;
-                }
-            }
-            var animator = new Animator(target, loop, allowDiscreteAnimation);
-            key && (animator.targetName = key);
-            this.addAnimator(animator, key);
-            return animator;
-        };
-        Element.prototype.addAnimator = function (animator, key) {
-            var zr = this.__zr;
-            var el = this;
-            animator.during(function () {
-                el.updateDuringAnimation(key);
-            }).done(function () {
-                var animators = el.animators;
-                var idx = indexOf(animators, animator);
-                if (idx >= 0) {
-                    animators.splice(idx, 1);
-                }
-            });
-            this.animators.push(animator);
-            if (zr) {
-                zr.animation.addAnimator(animator);
-            }
-            zr && zr.wakeUp();
-        };
-        Element.prototype.updateDuringAnimation = function (key) {
-            this.markRedraw();
-        };
-        Element.prototype.stopAnimation = function (scope, forwardToLast) {
-            var animators = this.animators;
-            var len = animators.length;
-            var leftAnimators = [];
-            for (var i = 0; i < len; i++) {
-                var animator = animators[i];
-                if (!scope || scope === animator.scope) {
-                    animator.stop(forwardToLast);
-                }
-                else {
-                    leftAnimators.push(animator);
-                }
-            }
-            this.animators = leftAnimators;
-            return this;
-        };
-        Element.prototype.animateTo = function (target, cfg, animationProps) {
-            animateTo(this, target, cfg, animationProps);
-        };
-        Element.prototype.animateFrom = function (target, cfg, animationProps) {
-            animateTo(this, target, cfg, animationProps, true);
-        };
-        Element.prototype._transitionState = function (stateName, target, cfg, animationProps) {
-            var animators = animateTo(this, target, cfg, animationProps);
-            for (var i = 0; i < animators.length; i++) {
-                animators[i].__fromStateTransition = stateName;
-            }
-        };
-        Element.prototype.getBoundingRect = function () {
-            return null;
-        };
-        Element.prototype.getPaintRect = function () {
-            return null;
-        };
-        Element.initDefaultProps = (function () {
-            var elProto = Element.prototype;
-            elProto.type = 'element';
-            elProto.name = '';
-            elProto.ignore =
-                elProto.silent =
-                    elProto.isGroup =
-                        elProto.draggable =
-                            elProto.dragging =
-                                elProto.ignoreClip =
-                                    elProto.__inHover = false;
-            elProto.__dirty = REDRAW_BIT;
-            var logs = {};
-            function logDeprecatedError(key, xKey, yKey) {
-                if (!logs[key + xKey + yKey]) {
-                    console.warn("DEPRECATED: '" + key + "' has been deprecated. use '" + xKey + "', '" + yKey + "' instead");
-                    logs[key + xKey + yKey] = true;
-                }
-            }
-            function createLegacyProperty(key, privateKey, xKey, yKey) {
-                Object.defineProperty(elProto, key, {
-                    get: function () {
-                        {
-                            logDeprecatedError(key, xKey, yKey);
-                        }
-                        if (!this[privateKey]) {
-                            var pos = this[privateKey] = [];
-                            enhanceArray(this, pos);
-                        }
-                        return this[privateKey];
-                    },
-                    set: function (pos) {
-                        {
-                            logDeprecatedError(key, xKey, yKey);
-                        }
-                        this[xKey] = pos[0];
-                        this[yKey] = pos[1];
-                        this[privateKey] = pos;
-                        enhanceArray(this, pos);
-                    }
-                });
-                function enhanceArray(self, pos) {
-                    Object.defineProperty(pos, 0, {
-                        get: function () {
-                            return self[xKey];
-                        },
-                        set: function (val) {
-                            self[xKey] = val;
-                        }
-                    });
-                    Object.defineProperty(pos, 1, {
-                        get: function () {
-                            return self[yKey];
-                        },
-                        set: function (val) {
-                            self[yKey] = val;
-                        }
-                    });
-                }
-            }
-            if (Object.defineProperty) {
-                createLegacyProperty('position', '_legacyPos', 'x', 'y');
-                createLegacyProperty('scale', '_legacyScale', 'scaleX', 'scaleY');
-                createLegacyProperty('origin', '_legacyOrigin', 'originX', 'originY');
-            }
-        })();
-        return Element;
-    }());
-    mixin(Element, Eventful);
-    mixin(Element, Transformable);
-    function animateTo(animatable, target, cfg, animationProps, reverse) {
-        cfg = cfg || {};
-        var animators = [];
-        animateToShallow(animatable, '', animatable, target, cfg, animationProps, animators, reverse);
-        var finishCount = animators.length;
-        var doneHappened = false;
-        var cfgDone = cfg.done;
-        var cfgAborted = cfg.aborted;
-        var doneCb = function () {
-            doneHappened = true;
-            finishCount--;
-            if (finishCount <= 0) {
-                doneHappened
-                    ? (cfgDone && cfgDone())
-                    : (cfgAborted && cfgAborted());
-            }
-        };
-        var abortedCb = function () {
-            finishCount--;
-            if (finishCount <= 0) {
-                doneHappened
-                    ? (cfgDone && cfgDone())
-                    : (cfgAborted && cfgAborted());
-            }
-        };
-        if (!finishCount) {
-            cfgDone && cfgDone();
-        }
-        if (animators.length > 0 && cfg.during) {
-            animators[0].during(function (target, percent) {
-                cfg.during(percent);
-            });
-        }
-        for (var i = 0; i < animators.length; i++) {
-            var animator = animators[i];
-            if (doneCb) {
-                animator.done(doneCb);
-            }
-            if (abortedCb) {
-                animator.aborted(abortedCb);
-            }
-            if (cfg.force) {
-                animator.duration(cfg.duration);
-            }
-            animator.start(cfg.easing);
-        }
-        return animators;
-    }
-    function copyArrShallow(source, target, len) {
-        for (var i = 0; i < len; i++) {
-            source[i] = target[i];
-        }
-    }
-    function is2DArray(value) {
-        return isArrayLike(value[0]);
-    }
-    function copyValue(target, source, key) {
-        if (isArrayLike(source[key])) {
-            if (!isArrayLike(target[key])) {
-                target[key] = [];
-            }
-            if (isTypedArray(source[key])) {
-                var len = source[key].length;
-                if (target[key].length !== len) {
-                    target[key] = new (source[key].constructor)(len);
-                    copyArrShallow(target[key], source[key], len);
-                }
-            }
-            else {
-                var sourceArr = source[key];
-                var targetArr = target[key];
-                var len0 = sourceArr.length;
-                if (is2DArray(sourceArr)) {
-                    var len1 = sourceArr[0].length;
-                    for (var i = 0; i < len0; i++) {
-                        if (!targetArr[i]) {
-                            targetArr[i] = Array.prototype.slice.call(sourceArr[i]);
-                        }
-                        else {
-                            copyArrShallow(targetArr[i], sourceArr[i], len1);
-                        }
-                    }
-                }
-                else {
-                    copyArrShallow(targetArr, sourceArr, len0);
-                }
-                targetArr.length = sourceArr.length;
-            }
-        }
-        else {
-            target[key] = source[key];
-        }
-    }
-    function isValueSame(val1, val2) {
-        return val1 === val2
-            || isArrayLike(val1) && isArrayLike(val2) && is1DArraySame(val1, val2);
-    }
-    function is1DArraySame(arr0, arr1) {
-        var len = arr0.length;
-        if (len !== arr1.length) {
-            return false;
-        }
-        for (var i = 0; i < len; i++) {
-            if (arr0[i] !== arr1[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-    function animateToShallow(animatable, topKey, animateObj, target, cfg, animationProps, animators, reverse) {
-        var targetKeys = keys(target);
-        var duration = cfg.duration;
-        var delay = cfg.delay;
-        var additive = cfg.additive;
-        var setToFinal = cfg.setToFinal;
-        var animateAll = !isObject(animationProps);
-        var existsAnimators = animatable.animators;
-        var animationKeys = [];
-        for (var k = 0; k < targetKeys.length; k++) {
-            var innerKey = targetKeys[k];
-            var targetVal = target[innerKey];
-            if (targetVal != null && animateObj[innerKey] != null
-                && (animateAll || animationProps[innerKey])) {
-                if (isObject(targetVal)
-                    && !isArrayLike(targetVal)
-                    && !isGradientObject(targetVal)) {
-                    if (topKey) {
-                        if (!reverse) {
-                            animateObj[innerKey] = targetVal;
-                            animatable.updateDuringAnimation(topKey);
-                        }
-                        continue;
-                    }
-                    animateToShallow(animatable, innerKey, animateObj[innerKey], targetVal, cfg, animationProps && animationProps[innerKey], animators, reverse);
-                }
-                else {
-                    animationKeys.push(innerKey);
-                }
-            }
-            else if (!reverse) {
-                animateObj[innerKey] = targetVal;
-                animatable.updateDuringAnimation(topKey);
-                animationKeys.push(innerKey);
-            }
-        }
-        var keyLen = animationKeys.length;
-        if (!additive && keyLen) {
-            for (var i = 0; i < existsAnimators.length; i++) {
-                var animator = existsAnimators[i];
-                if (animator.targetName === topKey) {
-                    var allAborted = animator.stopTracks(animationKeys);
-                    if (allAborted) {
-                        var idx = indexOf(existsAnimators, animator);
-                        existsAnimators.splice(idx, 1);
-                    }
-                }
-            }
-        }
-        if (!cfg.force) {
-            animationKeys = filter(animationKeys, function (key) { return !isValueSame(target[key], animateObj[key]); });
-            keyLen = animationKeys.length;
-        }
-        if (keyLen > 0
-            || (cfg.force && !animators.length)) {
-            var revertedSource = void 0;
-            var reversedTarget = void 0;
-            var sourceClone = void 0;
-            if (reverse) {
-                reversedTarget = {};
-                if (setToFinal) {
-                    revertedSource = {};
-                }
-                for (var i = 0; i < keyLen; i++) {
-                    var innerKey = animationKeys[i];
-                    reversedTarget[innerKey] = animateObj[innerKey];
-                    if (setToFinal) {
-                        revertedSource[innerKey] = target[innerKey];
-                    }
-                    else {
-                        animateObj[innerKey] = target[innerKey];
-                    }
-                }
-            }
-            else if (setToFinal) {
-                sourceClone = {};
-                for (var i = 0; i < keyLen; i++) {
-                    var innerKey = animationKeys[i];
-                    sourceClone[innerKey] = cloneValue(animateObj[innerKey]);
-                    copyValue(animateObj, target, innerKey);
-                }
-            }
-            var animator = new Animator(animateObj, false, false, additive ? filter(existsAnimators, function (animator) { return animator.targetName === topKey; }) : null);
-            animator.targetName = topKey;
-            if (cfg.scope) {
-                animator.scope = cfg.scope;
-            }
-            if (setToFinal && revertedSource) {
-                animator.whenWithKeys(0, revertedSource, animationKeys);
-            }
-            if (sourceClone) {
-                animator.whenWithKeys(0, sourceClone, animationKeys);
-            }
-            animator.whenWithKeys(duration == null ? 500 : duration, reverse ? reversedTarget : target, animationKeys).delay(delay || 0);
-            animatable.addAnimator(animator, topKey);
-            animators.push(animator);
-        }
-    }
-
-    var Group = (function (_super) {
-        __extends(Group, _super);
-        function Group(opts) {
-            var _this = _super.call(this) || this;
-            _this.isGroup = true;
-            _this._children = [];
-            _this.attr(opts);
-            return _this;
-        }
-        Group.prototype.childrenRef = function () {
-            return this._children;
-        };
-        Group.prototype.children = function () {
-            return this._children.slice();
-        };
-        Group.prototype.childAt = function (idx) {
-            return this._children[idx];
-        };
-        Group.prototype.childOfName = function (name) {
-            var children = this._children;
-            for (var i = 0; i < children.length; i++) {
-                if (children[i].name === name) {
-                    return children[i];
-                }
-            }
-        };
-        Group.prototype.childCount = function () {
-            return this._children.length;
-        };
-        Group.prototype.add = function (child) {
-            if (child) {
-                if (child !== this && child.parent !== this) {
-                    this._children.push(child);
-                    this._doAdd(child);
-                }
-                {
-                    if (child.__hostTarget) {
-                        throw 'This elemenet has been used as an attachment';
-                    }
-                }
-            }
-            return this;
-        };
-        Group.prototype.addBefore = function (child, nextSibling) {
-            if (child && child !== this && child.parent !== this
-                && nextSibling && nextSibling.parent === this) {
-                var children = this._children;
-                var idx = children.indexOf(nextSibling);
-                if (idx >= 0) {
-                    children.splice(idx, 0, child);
-                    this._doAdd(child);
-                }
-            }
-            return this;
-        };
-        Group.prototype.replace = function (oldChild, newChild) {
-            var idx = indexOf(this._children, oldChild);
-            if (idx >= 0) {
-                this.replaceAt(newChild, idx);
-            }
-            return this;
-        };
-        Group.prototype.replaceAt = function (child, index) {
-            var children = this._children;
-            var old = children[index];
-            if (child && child !== this && child.parent !== this && child !== old) {
-                children[index] = child;
-                old.parent = null;
-                var zr = this.__zr;
-                if (zr) {
-                    old.removeSelfFromZr(zr);
-                }
-                this._doAdd(child);
-            }
-            return this;
-        };
-        Group.prototype._doAdd = function (child) {
-            if (child.parent) {
-                child.parent.remove(child);
-            }
-            child.parent = this;
-            var zr = this.__zr;
-            if (zr && zr !== child.__zr) {
-                child.addSelfToZr(zr);
-            }
-            zr && zr.refresh();
-        };
-        Group.prototype.remove = function (child) {
-            var zr = this.__zr;
-            var children = this._children;
-            var idx = indexOf(children, child);
-            if (idx < 0) {
-                return this;
-            }
-            children.splice(idx, 1);
-            child.parent = null;
-            if (zr) {
-                child.removeSelfFromZr(zr);
-            }
-            zr && zr.refresh();
-            return this;
-        };
-        Group.prototype.removeAll = function () {
-            var children = this._children;
-            var zr = this.__zr;
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i];
-                if (zr) {
-                    child.removeSelfFromZr(zr);
-                }
-                child.parent = null;
-            }
-            children.length = 0;
-            return this;
-        };
-        Group.prototype.eachChild = function (cb, context) {
-            var children = this._children;
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i];
-                cb.call(context, child, i);
-            }
-            return this;
-        };
-        Group.prototype.traverse = function (cb, context) {
-            for (var i = 0; i < this._children.length; i++) {
-                var child = this._children[i];
-                var stopped = cb.call(context, child);
-                if (child.isGroup && !stopped) {
-                    child.traverse(cb, context);
-                }
-            }
-            return this;
-        };
-        Group.prototype.addSelfToZr = function (zr) {
-            _super.prototype.addSelfToZr.call(this, zr);
-            for (var i = 0; i < this._children.length; i++) {
-                var child = this._children[i];
-                child.addSelfToZr(zr);
-            }
-        };
-        Group.prototype.removeSelfFromZr = function (zr) {
-            _super.prototype.removeSelfFromZr.call(this, zr);
-            for (var i = 0; i < this._children.length; i++) {
-                var child = this._children[i];
-                child.removeSelfFromZr(zr);
-            }
-        };
-        Group.prototype.getBoundingRect = function (includeChildren) {
-            var tmpRect = new BoundingRect(0, 0, 0, 0);
-            var children = includeChildren || this._children;
-            var tmpMat = [];
-            var rect = null;
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i];
-                if (child.ignore || child.invisible) {
-                    continue;
-                }
-                var childRect = child.getBoundingRect();
-                var transform = child.getLocalTransform(tmpMat);
-                if (transform) {
-                    BoundingRect.applyTransform(tmpRect, childRect, transform);
-                    rect = rect || tmpRect.clone();
-                    rect.union(tmpRect);
-                }
-                else {
-                    rect = rect || childRect.clone();
-                    rect.union(childRect);
-                }
-            }
-            return rect || tmpRect;
-        };
-        return Group;
-    }(Element));
-    Group.prototype.type = 'group';
-
     /*!
     * ZRender, a high performance 2d drawing library.
     *
@@ -7072,7 +7114,7 @@
             }
             {
                 if (!painterCtors[rendererType]) {
-                    throw new Error("Renderer '" + rendererType + "' is not imported. Please import it first.");
+                    throw new Error("Renderer '".concat(rendererType, "' is not imported. Please import it first."));
                 }
             }
             opts.useDirtyRect = opts.useDirtyRect == null
@@ -7664,9 +7706,9 @@
     var mathSin = Math.sin;
     var mathCos = Math.cos;
     var PI2 = Math.PI * 2;
-    var start = create();
-    var end = create();
-    var extremity = create();
+    var start = create$1();
+    var end = create$1();
+    var extremity = create$1();
     function fromPoints(points, min, max) {
         if (points.length === 0) {
             return;
@@ -9253,10 +9295,10 @@
                     return _this;
                 }
                 Sub.prototype.getDefaultStyle = function () {
-                    return clone(defaultProps.style);
+                    return clone$2(defaultProps.style);
                 };
                 Sub.prototype.getDefaultShape = function () {
-                    return clone(defaultProps.shape);
+                    return clone$2(defaultProps.shape);
                 };
                 return Sub;
             }(Path));
@@ -10147,7 +10189,7 @@
                 }
             }
             sub(v, nextPoint, prevPoint);
-            scale(v, v, smooth);
+            scale$1(v, v, smooth);
             var d0 = distance(point, prevPoint);
             var d1 = distance(point, nextPoint);
             var sum = d0 + d1;
@@ -10155,8 +10197,8 @@
                 d0 /= sum;
                 d1 /= sum;
             }
-            scale(v1, v, -d0);
-            scale(v2, v, d1);
+            scale$1(v1, v, -d0);
+            scale$1(v2, v, d1);
             var cp0 = add([], point, v1);
             var cp1 = add([], point, v2);
             if (constraint) {
@@ -10897,13 +10939,13 @@
                 var value = transformOps_1[i];
                 var type = transformOps_1[i - 1];
                 var valueArr = splitNumberSequence(value);
-                mt = mt || create$1();
+                mt = mt || create();
                 switch (type) {
                     case 'translate':
                         translate(mt, mt, [parseFloat(valueArr[0]), parseFloat(valueArr[1] || '0')]);
                         break;
                     case 'scale':
-                        scale$1(mt, mt, [parseFloat(valueArr[0]), parseFloat(valueArr[1] || valueArr[0])]);
+                        scale(mt, mt, [parseFloat(valueArr[0]), parseFloat(valueArr[1] || valueArr[0])]);
                         break;
                     case 'rotate':
                         rotate(mt, mt, -parseFloat(valueArr[0]) * DEGREE_TO_ANGLE, [
@@ -10913,11 +10955,11 @@
                         break;
                     case 'skewX':
                         var sx = Math.tan(parseFloat(valueArr[0]) * DEGREE_TO_ANGLE);
-                        mul$1(mt, [1, 0, sx, 1, 0, 0], mt);
+                        mul(mt, [1, 0, sx, 1, 0, 0], mt);
                         break;
                     case 'skewY':
                         var sy = Math.tan(parseFloat(valueArr[0]) * DEGREE_TO_ANGLE);
-                        mul$1(mt, [1, sy, 0, 1, 0, 0], mt);
+                        mul(mt, [1, sy, 0, 1, 0, 0], mt);
                         break;
                     case 'matrix':
                         mt[0] = parseFloat(valueArr[0]);
@@ -11966,7 +12008,7 @@
     }
     var SAVED_METHOD_PREFIX = '__mOriginal_';
     function saveAndModifyMethod(obj, methodName, modifiers) {
-        var savedMethodName = SAVED_METHOD_PREFIX + methodName;
+        var savedMethodName = SAVED_METHOD_PREFIX + methodName.toString();
         var originalMethod = obj[savedMethodName] || obj[methodName];
         if (!obj[savedMethodName]) {
             obj[savedMethodName] = obj[methodName];
@@ -11989,7 +12031,7 @@
         };
     }
     function restoreMethod(obj, methodName) {
-        var savedMethodName = SAVED_METHOD_PREFIX + methodName;
+        var savedMethodName = SAVED_METHOD_PREFIX + methodName.toString();
         if (obj[savedMethodName]) {
             obj[methodName] = obj[savedMethodName];
             obj[savedMethodName] = null;
@@ -14592,7 +14634,7 @@
                 flushPathDrawn(ctx, scope);
                 styleChanged = true;
             }
-            ctx.globalCompositeOperation = style.blend || DEFAULT_COMMON_STYLE.blend;
+            ctx.globalCompositeOperation = (style.blend || DEFAULT_COMMON_STYLE.blend);
         }
         for (var i = 0; i < SHADOW_NUMBER_PROPS.length; i++) {
             var propName = SHADOW_NUMBER_PROPS[i];
@@ -15899,7 +15941,7 @@
         return stroke != null && stroke !== NONE;
     }
     var strokeProps = ['lineCap', 'miterLimit', 'lineJoin'];
-    var svgStrokeProps = map(strokeProps, function (prop) { return "stroke-" + prop.toLowerCase(); });
+    var svgStrokeProps = map(strokeProps, function (prop) { return "stroke-".concat(prop.toLowerCase()); });
     function mapStyleToAttrs(updateAttr, style, el, forceUpdate) {
         var opacity = style.opacity == null ? 1 : style.opacity;
         if (el instanceof ZRImage) {
@@ -15992,15 +16034,15 @@
                     continue;
                 }
                 else if (val !== true && val != null) {
-                    part += "=\"" + val + "\"";
+                    part += "=\"".concat(val, "\"");
                 }
                 attrsStr.push(part);
             }
         }
-        return "<" + name + " " + attrsStr.join(' ') + ">";
+        return "<".concat(name, " ").concat(attrsStr.join(' '), ">");
     }
     function createElementClose(name) {
-        return "</" + name + ">";
+        return "</".concat(name, ">");
     }
     function vNodeToString(el, opts) {
         opts = opts || {};
@@ -16009,7 +16051,7 @@
             var children = el.children, tag = el.tag, attrs = el.attrs, text = el.text;
             return createElementOpen(tag, attrs)
                 + (tag !== 'style' ? encodeHTML(text) : text || '')
-                + (children ? "" + S + map(children, function (child) { return convertElToString(child); }).join(S) + S : '')
+                + (children ? "".concat(S).concat(map(children, function (child) { return convertElToString(child); }).join(S)).concat(S) : '')
                 + createElementClose(tag);
         }
         return convertElToString(el);
@@ -16017,21 +16059,21 @@
     function getCssString(selectorNodes, animationNodes, opts) {
         opts = opts || {};
         var S = opts.newline ? '\n' : '';
-        var bracketBegin = " {" + S;
-        var bracketEnd = S + "}";
+        var bracketBegin = " {".concat(S);
+        var bracketEnd = "".concat(S, "}");
         var selectors = map(keys(selectorNodes), function (className) {
             return className + bracketBegin + map(keys(selectorNodes[className]), function (attrName) {
-                return attrName + ":" + selectorNodes[className][attrName] + ";";
+                return "".concat(attrName, ":").concat(selectorNodes[className][attrName], ";");
             }).join(S) + bracketEnd;
         }).join(S);
         var animations = map(keys(animationNodes), function (animationName) {
-            return "@keyframes " + animationName + bracketBegin + map(keys(animationNodes[animationName]), function (percent) {
+            return "@keyframes ".concat(animationName).concat(bracketBegin) + map(keys(animationNodes[animationName]), function (percent) {
                 return percent + bracketBegin + map(keys(animationNodes[animationName][percent]), function (attrName) {
                     var val = animationNodes[animationName][percent][attrName];
                     if (attrName === 'd') {
-                        val = "path(\"" + val + "\")";
+                        val = "path(\"".concat(val, "\")");
                     }
-                    return attrName + ":" + val + ";";
+                    return "".concat(attrName, ":").concat(val, ";");
                 }).join(S) + bracketEnd;
             }).join(S) + bracketEnd;
         }).join(S);
@@ -16066,7 +16108,7 @@
             'xmlns:xlink': XLINKNS,
             'version': '1.1',
             'baseProfile': 'full',
-            'viewBox': useViewBox ? "0 0 " + width + " " + height : false
+            'viewBox': useViewBox ? "0 0 ".concat(width, " ").concat(height) : false
         }, children);
     }
 
@@ -16112,7 +16154,7 @@
     function setTransformOrigin(target, transform) {
         var originX = transform.originX, originY = transform.originY;
         if (originX || originY) {
-            target[transformOriginKey] = originX + "px " + originY + "px";
+            target[transformOriginKey] = "".concat(originX, "px ").concat(originY, "px");
         }
     }
     var ANIMATE_STYLE_MAP = {
@@ -16166,7 +16208,7 @@
     function getEasingFunc(easing) {
         return isString(easing)
             ? EASING_MAP[easing]
-                ? "cubic-bezier(" + EASING_MAP[easing] + ")"
+                ? "cubic-bezier(".concat(EASING_MAP[easing], ")")
                 : createCubicEasingFunc(easing) ? easing : ''
             : '';
     }
@@ -16323,7 +16365,7 @@
             }
             if (filter(percents, function (percent) { return keys(finalKfs[percent]).length > 0; }).length) {
                 var animationName = addAnimation(finalKfs, scope);
-                return animationName + " " + groupAnimator[0] + " both";
+                return "".concat(animationName, " ").concat(groupAnimator[0], " both");
             }
         }
         for (var key in groupAnimators) {
@@ -16374,7 +16416,7 @@
                     lineWidth = lineWidth / scaleX;
                 }
                 var style = {
-                    cursor: 'pointer',
+                    cursor: 'pointer'
                 };
                 if (fill) {
                     style.fill = fill;
@@ -16449,7 +16491,7 @@
         if (m && !(noTranslate(m) && noRotateScale(m))) {
             var mul = compress ? 10 : 1e4;
             attrs.transform = noRotateScale(m)
-                ? "translate(" + round$1(m[4] * mul) / mul + " " + round$1(m[5] * mul) / mul + ")" : getMatrixStr(m);
+                ? "translate(".concat(round$1(m[4] * mul) / mul, " ").concat(round$1(m[5] * mul) / mul, ")") : getMatrixStr(m);
         }
     }
     function convertPolyShape(shape, attrs, mul) {
@@ -16605,17 +16647,17 @@
             }
             var fontFamily = style.fontFamily || DEFAULT_FONT_FAMILY;
             var fontWeight = style.fontWeight;
-            separatedFontStr += "font-size:" + fontSize + ";font-family:" + fontFamily + ";";
+            separatedFontStr += "font-size:".concat(fontSize, ";font-family:").concat(fontFamily, ";");
             if (fontStyle && fontStyle !== 'normal') {
-                separatedFontStr += "font-style:" + fontStyle + ";";
+                separatedFontStr += "font-style:".concat(fontStyle, ";");
             }
             if (fontWeight && fontWeight !== 'normal') {
-                separatedFontStr += "font-weight:" + fontWeight + ";";
+                separatedFontStr += "font-weight:".concat(fontWeight, ";");
             }
             attrs.style = separatedFontStr;
         }
         else {
-            attrs.style = "font: " + font;
+            attrs.style = "font: ".concat(font);
         }
         if (text.match(/\s/)) {
             attrs['xml:space'] = 'preserve';
@@ -16808,7 +16850,7 @@
             patternAttrs.height = imageHeight_1;
         }
         else if (val.svgElement) {
-            child = clone(val.svgElement);
+            child = clone$2(val.svgElement);
             patternAttrs.width = val.svgWidth;
             patternAttrs.height = val.svgHeight;
         }
@@ -16903,7 +16945,7 @@
             if (key !== undefined) {
                 {
                     if (map[key] != null) {
-                        console.error("Duplicate key " + key);
+                        console.error("Duplicate key ".concat(key));
                     }
                 }
                 map[key] = i;

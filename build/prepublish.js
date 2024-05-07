@@ -13,7 +13,6 @@ console.log(chalk.yellow('🔎 Checking versions in dist files...'));
 
 const fileVersions = [
     'package.json',
-    'package-lock.json',
     'dist/zrender.js',
     'dist/zrender.min.js'
 ].map(filePath => ({

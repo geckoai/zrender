@@ -392,7 +392,7 @@ function bindCommonProps(
             flushPathDrawn(ctx, scope);
             styleChanged = true;
         }
-        ctx.globalCompositeOperation = style.blend || DEFAULT_COMMON_STYLE.blend;
+        ctx.globalCompositeOperation = (style.blend || DEFAULT_COMMON_STYLE.blend) as any;
     }
     for (let i = 0; i < SHADOW_NUMBER_PROPS.length; i++) {
         const propName = SHADOW_NUMBER_PROPS[i];

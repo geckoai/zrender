@@ -8,6 +8,7 @@ const chalk = require('chalk');
 const progress = require('./progress');
 const UglifyJS = require('uglify-js');
 const fs = require('fs');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
 
 function current() {
     return (new Date()).toLocaleString();
@@ -17,6 +18,7 @@ function createInputOption(env, isWatch) {
     return {
         input: path.resolve(__dirname, '../index.ts'),
         plugins: [
+            nodeResolve(),
             typescript({
                 clean: !isWatch,
                 tsconfigOverride: {
@@ -37,7 +39,7 @@ function createInputOption(env, isWatch) {
                 scope: {
                     total: 0
                 }
-            })
+            }),
         ]
     };
 }

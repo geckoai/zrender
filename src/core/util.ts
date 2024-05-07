@@ -3,6 +3,8 @@ import { Dictionary, ArrayLike, KeyOfDistributive } from './types';
 import { GradientObject } from '../graphic/Gradient';
 import { ImagePatternObject } from '../graphic/Pattern';
 import { platformApi } from './platform';
+import Element from "../Element";
+import Group from "../graphic/Group";
 
 // 用于处理merge时无法遍历Date等对象的问题
 const BUILTIN_OBJECT: Record<string, boolean> = reduce([
@@ -50,6 +52,14 @@ const protoKey = '__proto__';
 
 let idStart = 0x0907;
 
+
+export function getParents(element: Element): Group[] {
+    if (element.parent instanceof Group) {
+        return [element.parent, ...getParents(element.parent)]
+    }
+    return [];
+}
+
 /**
  * Generate unique id
  */
@@ -96,12 +106,12 @@ export function clone<T extends any>(source: T): T {
             /* eslint-disable-next-line */
             const Ctor = source.constructor as typeof Float32Array;
             if (Ctor.from) {
-                result = Ctor.from(source as Float32Array);
+                result = Ctor.from(source as object as Float32Array);
             }
             else {
-                result = new Ctor((source as Float32Array).length);
-                for (let i = 0, len = (source as Float32Array).length; i < len; i++) {
-                    result[i] = (source as Float32Array)[i];
+                result = new Ctor((source as object as Float32Array).length);
+                for (let i = 0, len = (source as object as Float32Array).length; i < len; i++) {
+                    result[i] = (source as object as Float32Array)[i];
                 }
             }
         }
@@ -253,7 +263,7 @@ export function inherits(clazz: Function, baseClazz: Function) {
     (clazz as any).superClass = baseClazz;
 }
 
-export function mixin<T, S>(target: T | Function, source: S | Function, override?: boolean) {
+export function mixin<T extends object, S extends object>(target: T | Function, source: S | Function, override?: boolean) {
     target = 'prototype' in target ? target.prototype : target;
     source = 'prototype' in source ? source.prototype : source;
     // If build target is ES6 class. prototype methods is not enumerable. Use getOwnPropertyNames instead

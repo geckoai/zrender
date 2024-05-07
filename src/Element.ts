@@ -23,7 +23,7 @@ import {
     isTypedArray,
     isGradientObject,
     filter,
-    reduce
+    reduce, getParents
 } from './core/util';
 import Polyline from './graphic/shape/Polyline';
 import Group from './graphic/Group';
@@ -290,7 +290,7 @@ interface Element<Props extends ElementProps = ElementProps> extends Transformab
     ElementEventHandlerProps {
 }
 
-class Element<Props extends ElementProps = ElementProps> {
+abstract class Element<Props extends ElementProps = ElementProps> {
 
     id: number = guid()
     /**
@@ -1596,6 +1596,32 @@ class Element<Props extends ElementProps = ElementProps> {
         for (let i = 0; i < animators.length; i++) {
             animators[i].__fromStateTransition = stateName;
         }
+    }
+
+    getParents(): Group[] {
+        return getParents(this);
+    }
+
+    getAbsolutePosition(): { x: number; y: number } {
+        let {x, y} = this;
+        const parents = this.getParents();
+        parents.forEach((e) => {
+            x += e.x;
+            y += e.y;
+        });
+        return {x, y};
+    }
+
+    getAbsoluteBoundingRect(): BoundingRect {
+        const boundingRect =  this.getBoundingRect().plain();
+        boundingRect.x = this.x;
+        boundingRect.y = this.y;
+        const parents = this.getParents();
+        parents.forEach((e) => {
+            boundingRect.x += e.x;
+            boundingRect.y += e.y;
+        });
+        return BoundingRect.create(boundingRect);
     }
 
     /**

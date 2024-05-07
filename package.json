@@ -1,5 +1,5 @@
 {
-  "name": "zrender",
+  "name": "@geckoai/zrender",
   "version": "5.5.0",
   "description": "A lightweight graphic library providing 2d draw for Apache ECharts",
   "keywords": [
