@@ -200,6 +200,18 @@ class Path<Props extends PathProps = PathProps> extends Displayable<Props> {
         }
     }
 
+    getAbsoluteBoundingRect(): BoundingRect {
+        const boundingRect =  this.getBoundingRect().plain();
+        const parents = this.getParents();
+        boundingRect.x = this.shape.x;
+        boundingRect.y = this.shape.y;
+        parents.forEach((e) => {
+            boundingRect.x += e.x;
+            boundingRect.y += e.y;
+        });
+        return BoundingRect.create(boundingRect);
+    }
+
     getDecalElement() {
         return this._decalEl;
     }

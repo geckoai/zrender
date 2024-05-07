@@ -1612,18 +1612,7 @@ abstract class Element<Props extends ElementProps = ElementProps> {
         return {x, y};
     }
 
-    getAbsoluteBoundingRect(): BoundingRect {
-        const boundingRect =  this.getBoundingRect().plain();
-        boundingRect.x = this.x;
-        boundingRect.y = this.y;
-        const parents = this.getParents();
-        parents.forEach((e) => {
-            boundingRect.x += e.x;
-            boundingRect.y += e.y;
-        });
-        return BoundingRect.create(boundingRect);
-    }
-
+    abstract getAbsoluteBoundingRect(): BoundingRect;
     /**
      * Interface of getting the minimum bounding box.
      */

@@ -254,6 +254,19 @@ class Group extends Element<GroupProps> {
         }
     }
 
+    getAbsoluteBoundingRect(): BoundingRect  {
+        const boundingRect =  this.getBoundingRect().plain();
+        const parents = this.getParents();
+        boundingRect.x = this.x;
+        boundingRect.y = this.y;
+        parents.forEach((e) => {
+            boundingRect.x += e.x;
+            boundingRect.y += e.y;
+        });
+        return BoundingRect.create(boundingRect);
+    }
+
+
     getBoundingRect(includeChildren?: Element[]): BoundingRect {
         // TODO Caching
         const tmpRect = new BoundingRect(0, 0, 0, 0);

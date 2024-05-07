@@ -267,6 +267,18 @@ class Displayable<Props extends DisplayableProps = DisplayableProps> extends Ele
         return rect.contain(coord[0], coord[1]);
     }
 
+    getAbsoluteBoundingRect(): BoundingRect {
+        const boundingRect =  this.getBoundingRect().plain();
+        const parents = this.getParents();
+        boundingRect.x = this.x;
+        boundingRect.y = this.y;
+        parents.forEach((e) => {
+            boundingRect.x += e.x;
+            boundingRect.y += e.y;
+        });
+        return BoundingRect.create(boundingRect);
+    }
+
     getPaintRect(): BoundingRect {
         let rect = this._paintRect;
         if (!this._paintRect || this.__dirty) {

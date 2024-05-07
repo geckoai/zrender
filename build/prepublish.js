@@ -61,6 +61,7 @@ const untrackedFiles = execSync('git ls-files --others --exclude-standard', { en
 
 if (untrackedFiles.length) {
     const maybeUnexpectedFiles = ignore().add(npmignorePatterns).filter(untrackedFiles);
+    // console.log(maybeUnexpectedFiles);
     if (maybeUnexpectedFiles.length) {
         console.error(chalk.red(`❌ Found ${maybeUnexpectedFiles.length} file(s) that are neither tracked by git nor ignored by .npmignore! Please double-check before publishing them to npm.`));
         maybeUnexpectedFiles.forEach(filePath => {

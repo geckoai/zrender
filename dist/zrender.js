@@ -4190,17 +4190,6 @@
             });
             return { x: x, y: y };
         };
-        Element.prototype.getAbsoluteBoundingRect = function () {
-            var boundingRect = this.getBoundingRect().plain();
-            boundingRect.x = this.x;
-            boundingRect.y = this.y;
-            var parents = this.getParents();
-            parents.forEach(function (e) {
-                boundingRect.x += e.x;
-                boundingRect.y += e.y;
-            });
-            return BoundingRect.create(boundingRect);
-        };
         Element.prototype.getBoundingRect = function () {
             return null;
         };
@@ -4631,6 +4620,17 @@
                 var child = this._children[i];
                 child.removeSelfFromZr(zr);
             }
+        };
+        Group.prototype.getAbsoluteBoundingRect = function () {
+            var boundingRect = this.getBoundingRect().plain();
+            var parents = this.getParents();
+            boundingRect.x = this.x;
+            boundingRect.y = this.y;
+            parents.forEach(function (e) {
+                boundingRect.x += e.x;
+                boundingRect.y += e.y;
+            });
+            return BoundingRect.create(boundingRect);
         };
         Group.prototype.getBoundingRect = function (includeChildren) {
             var tmpRect = new BoundingRect(0, 0, 0, 0);
@@ -7380,7 +7380,7 @@
     function registerSSRDataGetter(getter) {
         ssrDataGetter = getter;
     }
-    var version = '5.5.0';
+    var version = '5.5.1';
 
     var STYLE_MAGIC_KEY = '__zr_style_' + Math.round((Math.random() * 10));
     var DEFAULT_COMMON_STYLE = {
@@ -7465,6 +7465,17 @@
             var coord = this.transformCoordToLocal(x, y);
             var rect = this.getBoundingRect();
             return rect.contain(coord[0], coord[1]);
+        };
+        Displayable.prototype.getAbsoluteBoundingRect = function () {
+            var boundingRect = this.getBoundingRect().plain();
+            var parents = this.getParents();
+            boundingRect.x = this.x;
+            boundingRect.y = this.y;
+            parents.forEach(function (e) {
+                boundingRect.x += e.x;
+                boundingRect.y += e.y;
+            });
+            return BoundingRect.create(boundingRect);
         };
         Displayable.prototype.getPaintRect = function () {
             var rect = this._paintRect;
@@ -8995,6 +9006,17 @@
             else if (this._decalEl) {
                 this._decalEl = null;
             }
+        };
+        Path.prototype.getAbsoluteBoundingRect = function () {
+            var boundingRect = this.getBoundingRect().plain();
+            var parents = this.getParents();
+            boundingRect.x = this.shape.x;
+            boundingRect.y = this.shape.y;
+            parents.forEach(function (e) {
+                boundingRect.x += e.x;
+                boundingRect.y += e.y;
+            });
+            return BoundingRect.create(boundingRect);
         };
         Path.prototype.getDecalElement = function () {
             return this._decalEl;
